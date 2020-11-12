@@ -228,6 +228,10 @@ XrdPosixXrootd::~XrdPosixXrootd()
   
 int XrdPosixXrootd::Access(const char *path, int amode)
 {
+#ifdef FILE_START_OFFSET_EXTENSION
+   std::string path_mutable(path);
+   path = path_mutable.c_str();
+#endif
    XrdPosixAdmin admin(path);
    mode_t stMode;
    bool   aOK = true;
@@ -372,6 +376,9 @@ int     XrdPosixXrootd::Fstat(int fildes, struct stat *buf)
    rc = fp->XCio->Fstat(*buf);
    if (rc <= 0)
       {fp->UnLock();
+#ifdef FILE_START_OFFSET_EXTENSION
+       if (rc == 0) buf->st_size -= fp->getStartOffset();
+#endif
        if (!rc) return 0;
        errno = -rc;
        return -1;
@@ -436,6 +443,9 @@ int XrdPosixXrootd::Ftruncate(int fildes, off_t offset)
 
 // Do the trunc
 //
+#ifdef FILE_START_OFFSET_EXTENSION
+   offset += fp->getStartOffset();
+#endif
    if ((rc = fp->XCio->Trunc(offset)) < 0) return Fault(fp, -rc);
    fp->UnLock();
    return 0;
@@ -452,6 +462,10 @@ int XrdPosixXrootd::Ftruncate(int fildes, off_t offset)
 long long XrdPosixXrootd::Getxattr (const char *path, const char *name, 
                                     void *value, unsigned long long size)
 {
+#ifdef FILE_START_OFFSET_EXTENSION
+   std::string path_mutable(path);
+   path = path_mutable.c_str();
+#endif
   XrdPosixAdmin admin(path);
   XrdCl::QueryCode::Code reqCode;
   int vsize = static_cast<int>(size);
@@ -494,6 +508,9 @@ off_t   XrdPosixXrootd::Lseek(int fildes, off_t offset, int whence)
 // Set the new offset. Note that SEEK_END requires that the file be opened.
 // An open may occur by calling the FSize() method via the cache pointer.
 //
+#ifdef FILE_START_OFFSET_EXTENSION
+   if (whence == SEEK_SET) offset += fp->getStartOffset();
+#endif
         if (whence == SEEK_SET) curroffset = fp->setOffset(offset);
    else if (whence == SEEK_CUR) curroffset = fp->addOffset(offset);
    else if (whence == SEEK_END)
@@ -506,6 +523,9 @@ off_t   XrdPosixXrootd::Lseek(int fildes, off_t offset, int whence)
 // All done
 //
    fp->UnLock();
+#ifdef FILE_START_OFFSET_EXTENSION
+   if (whence == SEEK_SET) curroffset -= fp->getStartOffset();
+#endif
    return curroffset;
 }
   
@@ -515,6 +535,10 @@ off_t   XrdPosixXrootd::Lseek(int fildes, off_t offset, int whence)
 
 int XrdPosixXrootd::Mkdir(const char *path, mode_t mode)
 {
+#ifdef FILE_START_OFFSET_EXTENSION
+   std::string path_mutable(path);
+   path = path_mutable.c_str();
+#endif
   XrdPosixAdmin admin(path);
   XrdCl::MkDirFlags::Flags flags;
 
@@ -555,6 +579,11 @@ int XrdPosixXrootd::Open(const char *path, int oflags, mode_t mode,
    XrdCl::OpenFlags::Flags XOflags;
    int Opts;
    bool aOK, isRO = false;
+
+#ifdef FILE_START_OFFSET_EXTENSION
+   std::string path_mutable(path);
+   path = path_mutable.c_str();
+#endif
 
 // Translate R/W and R/O flags
 //
@@ -645,6 +674,9 @@ int XrdPosixXrootd::Open(const char *path, int oflags, mode_t mode,
 // finalization is defered until the callback happens.
 //
    if (cbP) {errno = EINPROGRESS; return -1;}
+#ifdef FILE_START_OFFSET_EXTENSION
+   Lseek(fp->FDNum(), 0, SEEK_SET);
+#endif
    if (fp->Finalize(&Status)) return fp->FDNum();
    return XrdPosixMap::Result(Status);
 }
@@ -725,6 +757,10 @@ ssize_t XrdPosixXrootd::Pread(int fildes, void *buf, size_t nbyte, off_t offset)
 //
    if (!(fp = XrdPosixObject::File(fildes))) return -1;
 
+#ifdef FILE_START_OFFSET_EXTENSION
+   offset += fp->getStartOffset();
+#endif
+
 // Make sure the size is not too large
 //
    if (nbyte > (size_t)0x7fffffff) return Fault(fp,EOVERFLOW);
@@ -754,6 +790,10 @@ void XrdPosixXrootd::Pread(int fildes, void *buf, size_t nbyte, off_t offset,
 // Find the file object
 //
    if (!(fp = XrdPosixObject::File(fildes))) {cbp->Complete(-1); return;}
+
+#ifdef FILE_START_OFFSET_EXTENSION
+   offset += fp->getStartOffset();
+#endif
 
 // Make sure the size is not too large
 //
@@ -789,6 +829,10 @@ ssize_t XrdPosixXrootd::Pwrite(int fildes, const void *buf, size_t nbyte, off_t 
 // Find the file object
 //
    if (!(fp = XrdPosixObject::File(fildes))) return -1;
+
+#ifdef FILE_START_OFFSET_EXTENSION
+   offset += fp->getStartOffset();
+#endif
 
 // Make sure the size is not too large
 //
@@ -860,6 +904,10 @@ ssize_t XrdPosixXrootd::Read(int fildes, void *buf, size_t nbyte)
 //
    if (nbyte > (size_t)0x7fffffff) return Fault(fp,EOVERFLOW);
       else iosz = static_cast<int>(nbyte);
+
+#ifdef FILE_START_OFFSET_EXTENSION
+   if (Lseek(fp->FDNum(), 0, SEEK_CUR) == 0) Lseek(fp->FDNum(), 0, SEEK_SET);
+#endif
 
 // Issue the read
 //
@@ -1037,6 +1085,10 @@ int XrdPosixXrootd::Readdir64_r(DIR *dirp, struct dirent64  *entry,
 
 int XrdPosixXrootd::Rename(const char *oldpath, const char *newpath)
 {
+#ifdef FILE_START_OFFSET_EXTENSION
+   std::string oldpath_mutable(oldpath);
+   oldpath = oldpath_mutable.c_str();
+#endif
    XrdPosixAdmin admin(oldpath);
    XrdCl::URL newUrl((std::string)newpath);
 
@@ -1082,6 +1134,10 @@ void XrdPosixXrootd::Rewinddir(DIR *dirp)
 
 int XrdPosixXrootd::Rmdir(const char *path)
 {
+#ifdef FILE_START_OFFSET_EXTENSION
+   std::string path_mutable(path);
+   path = path_mutable.c_str();
+#endif
    XrdPosixAdmin admin(path);
 
 // Make sure the admin is OK
@@ -1130,6 +1186,10 @@ void XrdPosixXrootd::Seekdir(DIR *dirp, long loc)
   
 int XrdPosixXrootd::Stat(const char *path, struct stat *buf)
 {
+#ifdef FILE_START_OFFSET_EXTENSION
+   std::string path_mutable(path);
+   path = path_mutable.c_str();
+#endif
    XrdPosixAdmin admin(path);
    size_t stSize;
    dev_t  stRdev;
@@ -1216,6 +1276,10 @@ int XrdPosixXrootd::Statvfs(const char *path, struct statvfs *buf)
    static const int szVFS = sizeof(buf->f_bfree);
    static const long long max32 = 0x7fffffffLL;
 
+#ifdef FILE_START_OFFSET_EXTENSION
+   std::string path_mutable(path);
+   path = path_mutable.c_str();
+#endif
    XrdPosixAdmin       admin(path);
    XrdCl::StatInfoVFS *vfsStat;
 
@@ -1300,6 +1364,10 @@ long XrdPosixXrootd::Telldir(DIR *dirp)
   
 int XrdPosixXrootd::Truncate(const char *path, off_t Size)
 {
+#ifdef FILE_START_OFFSET_EXTENSION
+  std::string path_mutable(path);
+  path = path_mutable.c_str();
+#endif
   XrdPosixAdmin admin(path);
   uint64_t tSize = static_cast<uint64_t>(Size);
 
@@ -1327,6 +1395,10 @@ int XrdPosixXrootd::Truncate(const char *path, off_t Size)
 
 int XrdPosixXrootd::Unlink(const char *path)
 {
+#ifdef FILE_START_OFFSET_EXTENSION
+   std::string path_mutable(path);
+   path = path_mutable.c_str();
+#endif
    XrdPosixAdmin admin(path);
 
 // Make sure the admin is OK
@@ -1432,6 +1504,10 @@ bool XrdPosixXrootd::myFD(int fd)
 int XrdPosixXrootd::QueryChksum(const char *path,  time_t &Mtime,
                                       char *value, int     vsize)
 {
+#ifdef FILE_START_OFFSET_EXTENSION
+   std::string path_mutable(path);
+   path = path_mutable.c_str();
+#endif
    XrdPosixAdmin admin(path);
 
 // Stat the file first to allow vectoring of the request to the right server
@@ -1449,6 +1525,10 @@ int XrdPosixXrootd::QueryChksum(const char *path,  time_t &Mtime,
   
 long long XrdPosixXrootd::QueryOpaque(const char *path, char *value, int size)
 {
+#ifdef FILE_START_OFFSET_EXTENSION
+   std::string path_mutable(path);
+   path = path_mutable.c_str();
+#endif
    XrdPosixAdmin admin(path);
 
 // Stat the file first to allow vectoring of the request to the right server

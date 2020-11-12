@@ -123,6 +123,26 @@ XrdPosixFile::XrdPosixFile(bool &aOK, const char *path, XrdPosixCallBack *cbP,
                theCB(cbP), fLoc(0), cOpt(0),
                isStream(Opts & isStrm ? 1 : 0)
 {
+#ifdef FILE_START_OFFSET_EXTENSION
+// In spite of the declaration, treat path as mutable for truncation
+// if it contains the special suffix "+<OFFSET>" where OFFSET is the
+// user-specified BOT of the data in the file. User must insure that
+// this behavior is tolerated by the caller of this constructor.
+   setStartOffset(0);
+   char* p = (char*)path;
+   for (int i=strlen(path)-1; i > 0; --i) {
+      if (p[i] == '+') {
+         p[i] = '0';
+         setStartOffset(strtol(p+i, 0, 10));
+         p[i] = 0;
+      }
+      else if (p[i] >= '0' && p[i] <= '9') {
+         continue;
+      }
+      break;
+   }
+#endif
+
 // Handle path generation. This is trickt as we may have two namespaces. One
 // for the origin and one for the cache.
 //

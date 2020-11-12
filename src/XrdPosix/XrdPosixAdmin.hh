@@ -37,6 +37,7 @@
 #include "XrdCl/XrdClURL.hh"
 #include "XrdCl/XrdClXRootDResponses.hh"
 
+#define FILE_START_OFFSET_EXTENSION 1
 /******************************************************************************/
 /*                         X r d P o s i x A d m i n                          */
 /******************************************************************************/
@@ -59,8 +60,25 @@ int            Query(XrdCl::QueryCode::Code reqCode, void *buff, int bsz);
 bool           Stat(mode_t *flags=0, time_t *mtime=0,
                     size_t *size=0,  ino_t  *id=0, dev_t *rdv=0);
 
+#ifdef FILE_START_OFFSET_EXTENSION
+// In spite of the declaration, treat path as mutable for truncation
+// if it contains the special suffix "+<OFFSET>" where OFFSET is the
+// user-specified BOT of the data in the file.
+
+      XrdPosixAdmin(const char *path)
+                      : Url((std::string)path), Xrd(Url)
+      {
+         char* p = (char*)path;
+         for (int i=strlen(path)-1; i > 0; --i) {
+            if (p[i] == '+') p[i] = 0;
+            else if (p[i] >= '0' && p[i] <= '9') continue;
+            break;
+         }
+      }
+#else
       XrdPosixAdmin(const char *path)
                       : Url((std::string)path), Xrd(Url) {}
+#endif
      ~XrdPosixAdmin() {}
 };
 #endif

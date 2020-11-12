@@ -47,6 +47,7 @@
 #include "XrdPosix/XrdPosixMap.hh"
 #include "XrdPosix/XrdPosixObject.hh"
 
+#define FILE_START_OFFSET_EXTENSION 1
 /******************************************************************************/
 /*                    X r d P o s i x F i l e   C l a s s                     */
 /******************************************************************************/
@@ -184,6 +185,11 @@ static const int isUpdt = 4;
                         int   Opts=0);
           ~XrdPosixFile();
 
+#ifdef FILE_START_OFFSET_EXTENSION
+       long          getStartOffset() const {return startOffset;}
+       void          setStartOffset(long offset) {startOffset = offset;}
+#endif
+
 private:
 
 union {long long         currOffset;
@@ -196,5 +202,9 @@ char       *fOpen;
 char       *fLoc;
 union {int  cOpt; int numTries;};
 char        isStream;
+
+#ifdef FILE_START_OFFSET_EXTENSION
+long        startOffset;
+#endif
 };
 #endif
