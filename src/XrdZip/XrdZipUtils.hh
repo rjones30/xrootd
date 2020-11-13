@@ -60,13 +60,25 @@ namespace XrdZip
   }
 
   //---------------------------------------------------------------------------
-  // Copies bytes into an integer type
+  // Copies bytes into an integer type and advances the buffer by the number
+  // of bytes read.
   //---------------------------------------------------------------------------
   template<typename INT>
   inline static void from_buffer( INT &var, const char *&buffer )
   {
     memcpy( &var, buffer, sizeof( INT ) );
     buffer += sizeof( INT );
+  }
+
+  //---------------------------------------------------------------------------
+  // Converts bytes into an integer type
+  //---------------------------------------------------------------------------
+  template<typename INT>
+  inline static INT to( const char *buffer )
+  {
+    INT value;
+    memcpy( &value, buffer, sizeof( INT) );
+    return value;
   }
 
   //---------------------------------------------------------------------------

@@ -37,6 +37,16 @@ namespace XrdZip
   //---------------------------------------------------------------------------
   struct EOCD
   {
+    inline static const char* Find( const char *buffer, uint64_t size )
+    {
+      for( ssize_t offset = size - eocdBaseSize; offset >= 0; --offset )
+      {
+        uint32_t signature = to<uint32_t>( buffer + offset );
+        if( signature == eocdSign ) return buffer + offset;
+      }
+      return 0;
+    }
+
     //-------------------------------------------------------------------------
     //! Constructor from buffer
     //-------------------------------------------------------------------------
