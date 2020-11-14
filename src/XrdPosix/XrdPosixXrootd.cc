@@ -228,10 +228,6 @@ XrdPosixXrootd::~XrdPosixXrootd()
   
 int XrdPosixXrootd::Access(const char *path, int amode)
 {
-#ifdef FILE_START_OFFSET_EXTENSION
-   std::string path_mutable(path);
-   path = path_mutable.c_str();
-#endif
    XrdPosixAdmin admin(path);
    mode_t stMode;
    bool   aOK = true;
@@ -376,9 +372,6 @@ int     XrdPosixXrootd::Fstat(int fildes, struct stat *buf)
    rc = fp->XCio->Fstat(*buf);
    if (rc <= 0)
       {fp->UnLock();
-#ifdef FILE_START_OFFSET_EXTENSION
-       if (rc == 0) buf->st_size -= fp->getStartOffset();
-#endif
        if (!rc) return 0;
        errno = -rc;
        return -1;
@@ -443,9 +436,6 @@ int XrdPosixXrootd::Ftruncate(int fildes, off_t offset)
 
 // Do the trunc
 //
-#ifdef FILE_START_OFFSET_EXTENSION
-   offset += fp->getStartOffset();
-#endif
    if ((rc = fp->XCio->Trunc(offset)) < 0) return Fault(fp, -rc);
    fp->UnLock();
    return 0;
@@ -462,10 +452,6 @@ int XrdPosixXrootd::Ftruncate(int fildes, off_t offset)
 long long XrdPosixXrootd::Getxattr (const char *path, const char *name, 
                                     void *value, unsigned long long size)
 {
-#ifdef FILE_START_OFFSET_EXTENSION
-   std::string path_mutable(path);
-   path = path_mutable.c_str();
-#endif
   XrdPosixAdmin admin(path);
   XrdCl::QueryCode::Code reqCode;
   int vsize = static_cast<int>(size);
@@ -508,9 +494,6 @@ off_t   XrdPosixXrootd::Lseek(int fildes, off_t offset, int whence)
 // Set the new offset. Note that SEEK_END requires that the file be opened.
 // An open may occur by calling the FSize() method via the cache pointer.
 //
-#ifdef FILE_START_OFFSET_EXTENSION
-   if (whence == SEEK_SET) offset += fp->getStartOffset();
-#endif
         if (whence == SEEK_SET) curroffset = fp->setOffset(offset);
    else if (whence == SEEK_CUR) curroffset = fp->addOffset(offset);
    else if (whence == SEEK_END)
@@ -523,9 +506,6 @@ off_t   XrdPosixXrootd::Lseek(int fildes, off_t offset, int whence)
 // All done
 //
    fp->UnLock();
-#ifdef FILE_START_OFFSET_EXTENSION
-   if (whence == SEEK_SET) curroffset -= fp->getStartOffset();
-#endif
    return curroffset;
 }
   
@@ -535,10 +515,6 @@ off_t   XrdPosixXrootd::Lseek(int fildes, off_t offset, int whence)
 
 int XrdPosixXrootd::Mkdir(const char *path, mode_t mode)
 {
-#ifdef FILE_START_OFFSET_EXTENSION
-   std::string path_mutable(path);
-   path = path_mutable.c_str();
-#endif
   XrdPosixAdmin admin(path);
   XrdCl::MkDirFlags::Flags flags;
 
@@ -580,7 +556,7 @@ int XrdPosixXrootd::Open(const char *path, int oflags, mode_t mode,
    int Opts;
    bool aOK, isRO = false;
 
-#ifdef FILE_START_OFFSET_EXTENSION
+#ifdef EVIO_BLOCK_SUBSET_EXTENSION
    std::string path_mutable(path);
    path = path_mutable.c_str();
 #endif
@@ -674,9 +650,6 @@ int XrdPosixXrootd::Open(const char *path, int oflags, mode_t mode,
 // finalization is defered until the callback happens.
 //
    if (cbP) {errno = EINPROGRESS; return -1;}
-#ifdef FILE_START_OFFSET_EXTENSION
-   Lseek(fp->FDNum(), 0, SEEK_SET);
-#endif
    if (fp->Finalize(&Status)) return fp->FDNum();
    return XrdPosixMap::Result(Status);
 }
@@ -757,10 +730,6 @@ ssize_t XrdPosixXrootd::Pread(int fildes, void *buf, size_t nbyte, off_t offset)
 //
    if (!(fp = XrdPosixObject::File(fildes))) return -1;
 
-#ifdef FILE_START_OFFSET_EXTENSION
-   offset += fp->getStartOffset();
-#endif
-
 // Make sure the size is not too large
 //
    if (nbyte > (size_t)0x7fffffff) return Fault(fp,EOVERFLOW);
@@ -790,10 +759,6 @@ void XrdPosixXrootd::Pread(int fildes, void *buf, size_t nbyte, off_t offset,
 // Find the file object
 //
    if (!(fp = XrdPosixObject::File(fildes))) {cbp->Complete(-1); return;}
-
-#ifdef FILE_START_OFFSET_EXTENSION
-   offset += fp->getStartOffset();
-#endif
 
 // Make sure the size is not too large
 //
@@ -829,10 +794,6 @@ ssize_t XrdPosixXrootd::Pwrite(int fildes, const void *buf, size_t nbyte, off_t 
 // Find the file object
 //
    if (!(fp = XrdPosixObject::File(fildes))) return -1;
-
-#ifdef FILE_START_OFFSET_EXTENSION
-   offset += fp->getStartOffset();
-#endif
 
 // Make sure the size is not too large
 //
@@ -900,14 +861,164 @@ ssize_t XrdPosixXrootd::Read(int fildes, void *buf, size_t nbyte)
 //
    if (!(fp = XrdPosixObject::File(fildes))) return -1;
 
+#ifdef EVIO_BLOCK_SUBSET_EXTENSION
+
+#define SWAB(X) (((X)[0]<<24)+((X)[1]<<16)+((X)[2]<<8)+((X)[3]))
+
+// Here is the song and dance necessary to allow the consumer of
+// EVIO data to think it is reading events from the start of a file
+// even though they are actually coming from somewere in the middle.
+//
+// 1. Respond to the user's first read by feeding the first chunk
+//    containing the PRESTART into the application buffer.
+// 2. Follow this by a second chunk containing just the BOR followed by
+//    the GO record. To do this, I will need to modify the block length
+//    and event count in the chunk header to remove all of the physics
+//    events from the end of the chunk, leaving only the BOR + GO.
+// 3. Following this second chunk, seek downstream in the input file
+//    to the start of the chunk indicated by the offset requested by
+//    the user, and proceed reading data from the file from there. 
+
+   long skipblocks = fp->getEVIOblockSubsetStart();
+   off_t startoff = fp->getEVIOblockOffsetStart();
+   long stopblocks = fp->getEVIOblockSubsetStop();
+   off_t stopoff = fp->getEVIOblockOffsetStop();
+   if (skipblocks > 0 && startoff == 0) {
+      fp->setEVIOblockSubsetLimits(0,0);
+      int prestartBufsize = 1000000;
+      unsigned char *prebuf = (unsigned char*)malloc(prestartBufsize);
+      // Read the 4-byte word count of the first chunk
+      Read(fildes, prebuf, 4);
+      int chunk = SWAB(prebuf) * 4;
+      // Read through the 32-byte header of the second chunk
+      // to get the word count of the first bank in chunk 2
+      while (chunk + 36 > prestartBufsize) {
+         prestartBufsize *= 2;
+         unsigned char *p = (unsigned char*)malloc(prestartBufsize);
+         memcpy(p, prebuf, 4);
+         free(prebuf);
+         prebuf = p;
+      }
+      Read(fildes, prebuf + 4, chunk + 32);
+      unsigned char *prebuf2 = prebuf + chunk + 32;
+      int bank2 = SWAB(prebuf2) * 4;
+      // Read through the contents of the first chunk 2 bank 
+      // to get the word count of the second bank in chunk 2
+      while (chunk + 36 + bank2 + 4 > prestartBufsize) {
+         prestartBufsize *= 2;
+         unsigned char *p = (unsigned char*)malloc(prestartBufsize);
+         memcpy(p, prebuf, chunk + 36);
+         free(prebuf);
+         prebuf = p;
+      }
+      Read(fildes, prebuf2 + 4, bank2 + 4);
+      unsigned char *prebuf3 = prebuf2 + bank2 + 4;
+      int bank3 = SWAB(prebuf3) * 4;
+      // Read through the contents of the chunk 2 bank 2
+      while (chunk + 36 + bank2 + 4 + bank3 > prestartBufsize) {
+         prestartBufsize *= 2;
+         unsigned char *p = (unsigned char*)malloc(prestartBufsize);
+         memcpy(p, prebuf, chunk + 36 + bank2 + 4);
+         free(prebuf);
+         prebuf = p;
+      }
+      Read(fildes, prebuf3 + 4, bank3);
+      unsigned int chunk2 = 36 + bank2 + 4 + bank3;
+      fp->setEVIOprestartData(prebuf, chunk + chunk2);
+      // Adjust the header of chunk 2 so it contains
+      // only these two records, BOR and GO.
+      prebuf += chunk;
+      prebuf[0] = (chunk2 >> 26) & 0xff;
+      prebuf[1] = (chunk2 >> 18) & 0xff;
+      prebuf[2] = (chunk2 >> 10) & 0xff;
+      prebuf[3] = (chunk2 >> 2) & 0xff;
+      prebuf[16] = 0;
+      prebuf[17] = 0;
+      prebuf[18] = 0;
+      prebuf[19] = 2;
+      // Advance the read pointer to the start of the 
+      // chunk of physics events we want to consume.
+      off_t pos = Lseek(fp->FDNum(), 0, SEEK_SET);
+      for (int i=0; i < skipblocks; ++i) {
+         unsigned char evio_block_hdr[32];
+         if (Read(fildes, evio_block_hdr, 32) != 32) {
+            pos = Lseek(fp->FDNum(), 0, SEEK_END);
+            break;
+         }
+         unsigned int length = SWAB(evio_block_hdr);
+         unsigned int events = SWAB(evio_block_hdr + 12);
+         unsigned int magic = SWAB(evio_block_hdr + 28);
+         if (magic != 0xc0da0100 || length < 8) {
+            pos = Lseek(fp->FDNum(), 0, SEEK_END);
+            break;
+         }
+         pos += length * 4;
+         std::cout << "XrdPosixXrootd::Read skipping block of " 
+                   << events << " events, length "
+                   << length * 4 << " bytes" << std::endl;
+         pos = Lseek(fp->FDNum(), pos, SEEK_SET);
+      }
+      startoff = pos;
+      stopoff = 0;
+      fp->setEVIOblockOffsetLimits(startoff, stopoff);
+      fp->setEVIOblockSubsetLimits(skipblocks, stopblocks);
+   }
+   if (stopblocks > 0 && stopoff == 0) {
+      fp->setEVIOblockSubsetLimits(0,0);
+      // Advance the read pointer to the start of the 
+      // chunk of physics events we want to consume.
+      off_t pos = Lseek(fp->FDNum(), startoff, SEEK_SET);
+      for (int i=skipblocks; i < stopblocks; ++i) {
+         unsigned char evio_block_hdr[32];
+         if (Read(fildes, evio_block_hdr, 32) != 32) {
+            pos = Lseek(fp->FDNum(), 0, SEEK_END);
+            break;
+         }
+         unsigned int length = SWAB(evio_block_hdr);
+         unsigned int events = SWAB(evio_block_hdr + 12);
+         unsigned int magic = SWAB(evio_block_hdr + 28);
+         if (magic != 0xc0da0100 || length < 8) {
+            pos = Lseek(fp->FDNum(), 0, SEEK_END);
+            break;
+         }
+         pos += length * 4;
+         std::cout << "XrdPosixXrootd::Read scanning block of " 
+                   << events << " events, length "
+                   << length * 4 << " bytes" << std::endl;
+         pos = Lseek(fp->FDNum(), pos, SEEK_SET);
+      }
+      stopoff = pos;
+      Lseek(fp->FDNum(), startoff, SEEK_SET);
+      fp->setEVIOblockOffsetLimits(startoff, stopoff);
+      fp->setEVIOblockSubsetLimits(skipblocks, stopblocks);
+   }
+   if (skipblocks > 0 && fp->hasEVIOprestartData()) {
+      // Feed from the prestart buffer until it is empty,
+      // then fall through to reading from the file.
+      size_t npre = fp->getEVIOprestartData((unsigned char*)buf, nbyte);
+      size_t nleft = nbyte - npre;
+      if (nleft > 0) {
+         size_t nres = Read(fildes, (char*)buf + npre, nleft);
+         if (nres > 0)
+            return npre + nres;
+         else
+            return nres;
+      }
+      return nbyte;
+   }
+   else if (stopblocks > 0) {
+      off_t pos = Lseek(fp->FDNum(), 0, SEEK_CUR);
+      if (pos >= stopoff)
+         pos = Lseek(fp->FDNum(), 0, SEEK_END);
+      else if ((signed long)nbyte > stopoff - pos)
+         nbyte = stopoff - pos;
+   }
+#endif
+
 // Make sure the size is not too large
 //
    if (nbyte > (size_t)0x7fffffff) return Fault(fp,EOVERFLOW);
       else iosz = static_cast<int>(nbyte);
-
-#ifdef FILE_START_OFFSET_EXTENSION
-   if (Lseek(fp->FDNum(), 0, SEEK_CUR) == 0) Lseek(fp->FDNum(), 0, SEEK_SET);
-#endif
 
 // Issue the read
 //
@@ -1085,10 +1196,6 @@ int XrdPosixXrootd::Readdir64_r(DIR *dirp, struct dirent64  *entry,
 
 int XrdPosixXrootd::Rename(const char *oldpath, const char *newpath)
 {
-#ifdef FILE_START_OFFSET_EXTENSION
-   std::string oldpath_mutable(oldpath);
-   oldpath = oldpath_mutable.c_str();
-#endif
    XrdPosixAdmin admin(oldpath);
    XrdCl::URL newUrl((std::string)newpath);
 
@@ -1134,10 +1241,6 @@ void XrdPosixXrootd::Rewinddir(DIR *dirp)
 
 int XrdPosixXrootd::Rmdir(const char *path)
 {
-#ifdef FILE_START_OFFSET_EXTENSION
-   std::string path_mutable(path);
-   path = path_mutable.c_str();
-#endif
    XrdPosixAdmin admin(path);
 
 // Make sure the admin is OK
@@ -1186,10 +1289,6 @@ void XrdPosixXrootd::Seekdir(DIR *dirp, long loc)
   
 int XrdPosixXrootd::Stat(const char *path, struct stat *buf)
 {
-#ifdef FILE_START_OFFSET_EXTENSION
-   std::string path_mutable(path);
-   path = path_mutable.c_str();
-#endif
    XrdPosixAdmin admin(path);
    size_t stSize;
    dev_t  stRdev;
@@ -1276,10 +1375,6 @@ int XrdPosixXrootd::Statvfs(const char *path, struct statvfs *buf)
    static const int szVFS = sizeof(buf->f_bfree);
    static const long long max32 = 0x7fffffffLL;
 
-#ifdef FILE_START_OFFSET_EXTENSION
-   std::string path_mutable(path);
-   path = path_mutable.c_str();
-#endif
    XrdPosixAdmin       admin(path);
    XrdCl::StatInfoVFS *vfsStat;
 
@@ -1364,10 +1459,6 @@ long XrdPosixXrootd::Telldir(DIR *dirp)
   
 int XrdPosixXrootd::Truncate(const char *path, off_t Size)
 {
-#ifdef FILE_START_OFFSET_EXTENSION
-  std::string path_mutable(path);
-  path = path_mutable.c_str();
-#endif
   XrdPosixAdmin admin(path);
   uint64_t tSize = static_cast<uint64_t>(Size);
 
@@ -1395,10 +1486,6 @@ int XrdPosixXrootd::Truncate(const char *path, off_t Size)
 
 int XrdPosixXrootd::Unlink(const char *path)
 {
-#ifdef FILE_START_OFFSET_EXTENSION
-   std::string path_mutable(path);
-   path = path_mutable.c_str();
-#endif
    XrdPosixAdmin admin(path);
 
 // Make sure the admin is OK
@@ -1504,10 +1591,6 @@ bool XrdPosixXrootd::myFD(int fd)
 int XrdPosixXrootd::QueryChksum(const char *path,  time_t &Mtime,
                                       char *value, int     vsize)
 {
-#ifdef FILE_START_OFFSET_EXTENSION
-   std::string path_mutable(path);
-   path = path_mutable.c_str();
-#endif
    XrdPosixAdmin admin(path);
 
 // Stat the file first to allow vectoring of the request to the right server
@@ -1525,10 +1608,6 @@ int XrdPosixXrootd::QueryChksum(const char *path,  time_t &Mtime,
   
 long long XrdPosixXrootd::QueryOpaque(const char *path, char *value, int size)
 {
-#ifdef FILE_START_OFFSET_EXTENSION
-   std::string path_mutable(path);
-   path = path_mutable.c_str();
-#endif
    XrdPosixAdmin admin(path);
 
 // Stat the file first to allow vectoring of the request to the right server

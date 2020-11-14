@@ -47,7 +47,7 @@
 #include "XrdPosix/XrdPosixMap.hh"
 #include "XrdPosix/XrdPosixObject.hh"
 
-#define FILE_START_OFFSET_EXTENSION 1
+#define EVIO_BLOCK_SUBSET_EXTENSION 1
 /******************************************************************************/
 /*                    X r d P o s i x F i l e   C l a s s                     */
 /******************************************************************************/
@@ -185,9 +185,41 @@ static const int isUpdt = 4;
                         int   Opts=0);
           ~XrdPosixFile();
 
-#ifdef FILE_START_OFFSET_EXTENSION
-       long          getStartOffset() const {return startOffset;}
-       void          setStartOffset(long offset) {startOffset = offset;}
+#ifdef EVIO_BLOCK_SUBSET_EXTENSION
+       long          getEVIOblockSubsetStart() const {return blockSubsetStart;}
+       long          getEVIOblockSubsetStop() const {return blockSubsetStop;}
+       void          setEVIOblockSubsetLimits(long start, long stop)
+                     {
+                        blockSubsetStart = start;
+                        blockSubsetStop = stop;
+                     }
+       off_t         getEVIOblockOffsetStart() const {return blockSubsetMarker[0];}
+       off_t         getEVIOblockOffsetStop() const {return blockSubsetMarker[1];}
+       void          setEVIOblockOffsetLimits(off_t start, off_t stop)
+                     {
+                        blockSubsetMarker[0] = start;
+                        blockSubsetMarker[1] = stop;
+                     }
+       long int      getEVIOprestartData(unsigned char *buf, long int nbytes)
+                     {
+                        if (nbytes > prestartBufferCount)
+                           nbytes = prestartBufferCount;
+                        memcpy(buf, prestartReadptr, nbytes);
+                        prestartReadptr += nbytes;
+                        prestartBufferCount -= nbytes;
+                        if (prestartBufferCount == 0) {
+                           free(prestartBuffer);
+                           prestartBuffer = 0;
+                        }
+                        return nbytes;
+                     }
+       void          setEVIOprestartData(unsigned char *buf, long unsigned int nbytes)
+                     {
+                        prestartBuffer = buf;
+                        prestartReadptr = buf;
+                        prestartBufferCount = nbytes;
+                     }
+       long          hasEVIOprestartData() {return prestartBufferCount;}
 #endif
 
 private:
@@ -203,8 +235,13 @@ char       *fLoc;
 union {int  cOpt; int numTries;};
 char        isStream;
 
-#ifdef FILE_START_OFFSET_EXTENSION
-long        startOffset;
+#ifdef EVIO_BLOCK_SUBSET_EXTENSION
+long int    blockSubsetStart;
+long int    blockSubsetStop;
+off_t       blockSubsetMarker[2];
+unsigned char* prestartBuffer;
+unsigned char* prestartReadptr;
+long int    prestartBufferCount;
 #endif
 };
 #endif

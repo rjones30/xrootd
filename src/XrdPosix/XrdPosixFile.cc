@@ -123,18 +123,31 @@ XrdPosixFile::XrdPosixFile(bool &aOK, const char *path, XrdPosixCallBack *cbP,
                theCB(cbP), fLoc(0), cOpt(0),
                isStream(Opts & isStrm ? 1 : 0)
 {
-#ifdef FILE_START_OFFSET_EXTENSION
+#ifdef EVIO_BLOCK_SUBSET_EXTENSION
 // In spite of the declaration, treat path as mutable for truncation
-// if it contains the special suffix "+<OFFSET>" where OFFSET is the
-// user-specified BOT of the data in the file. User must insure that
-// this behavior is tolerated by the caller of this constructor.
-   setStartOffset(0);
+// if it contains the special suffix "+<START>,<STOP>" where <START>
+// is a user-specified number of blocks to skip from the beginning of
+// the file, and <STOP> is the corresponding block number before which
+// the reading should stop.
+   setEVIOblockOffsetLimits(0,0);
+   setEVIOblockSubsetLimits(0,0);
+   setEVIOprestartData(0,0);
    char* p = (char*)path;
+   long int start(0);
+   long int stop(0);
    for (int i=strlen(path)-1; i > 0; --i) {
       if (p[i] == '+') {
          p[i] = '0';
-         setStartOffset(strtol(p+i, 0, 10));
+         start = strtol(p+i, 0, 10);
+         setEVIOblockSubsetLimits(start, stop);
          p[i] = 0;
+      }
+      else if (p[i] == ',') {
+         p[i] = '0';
+         stop = strtol(p+i, 0, 10);
+         setEVIOblockSubsetLimits(start, stop);
+         p[i] = 0;
+         continue;
       }
       else if (p[i] >= '0' && p[i] <= '9') {
          continue;
