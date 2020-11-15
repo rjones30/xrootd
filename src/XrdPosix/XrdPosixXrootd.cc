@@ -500,8 +500,10 @@ off_t   XrdPosixXrootd::Lseek(int fildes, off_t offset, int whence)
       offset += startoff - preset;
    }
    else if (stopoff > 0 && whence == SEEK_END) {
-      whence = SEEK_SET;
-      offset += stopoff;
+      if (offset < 0) {
+         whence = SEEK_SET;
+         offset += stopoff;
+      }
    }
 #endif
 
@@ -519,6 +521,9 @@ off_t   XrdPosixXrootd::Lseek(int fildes, off_t offset, int whence)
 
 #ifdef EVIO_BLOCK_SUBSET_EXTENSION
    // map back to the virtual file offset on output
+   if (stopoff > 0 && curroffset > stopoff) {
+      curroffset = stopoff;
+   }
    if (startoff > 0) {
       size_t preset = fp->getEVIOprestartData();
       curroffset -= startoff - preset;
@@ -1038,7 +1043,10 @@ ssize_t XrdPosixXrootd::Read(int fildes, void *buf, size_t nbyte)
    }
    if (stopblocks > 0) {
       off_t pstop = stopoff - startoff + fp->getEVIOprestartData();
-      nbyte = ((off_t)nbyte >= pstop - pos)? pstop - pos : nbyte;
+      if (pos > pstop)
+         Lseek(fp->FDNum(), 0, SEEK_END);
+      else if (pos + (long int)nbyte > pstop)
+         nbyte = pstop - pos;
    }
 #endif
 
