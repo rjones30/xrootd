@@ -201,6 +201,12 @@ XrdPosixFile::~XrdPosixFile()
    if (fPath) free(fPath);
    if (fOpen != fPath) free(fOpen);
    if (fLoc)  free(fLoc);
+
+#ifdef EVIO_BLOCK_SUBSET_EXTENSION
+   unsigned char *buf;
+   getEVIOprestartData(&buf);
+   if (buf) free(buf);
+#endif
 }
 
 /******************************************************************************/

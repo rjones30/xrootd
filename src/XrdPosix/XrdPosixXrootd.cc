@@ -491,6 +491,20 @@ off_t   XrdPosixXrootd::Lseek(int fildes, off_t offset, int whence)
 //
    if (!(fp = XrdPosixObject::File(fildes))) return -1;
 
+#ifdef EVIO_BLOCK_SUBSET_EXTENSION
+   // map into the physical file offset on input
+   off_t startoff = fp->getEVIOblockOffsetStart();
+   off_t stopoff = fp->getEVIOblockOffsetStop();
+   if (startoff > 0 && whence == SEEK_SET) {
+      size_t preset = fp->getEVIOprestartData();
+      offset += startoff - preset;
+   }
+   else if (stopoff > 0 && whence == SEEK_END) {
+      whence = SEEK_SET;
+      offset += stopoff;
+   }
+#endif
+
 // Set the new offset. Note that SEEK_END requires that the file be opened.
 // An open may occur by calling the FSize() method via the cache pointer.
 //
@@ -502,6 +516,14 @@ off_t   XrdPosixXrootd::Lseek(int fildes, off_t offset, int whence)
             curroffset = fp->setOffset(curroffset+offset);
            }
    else return Fault(fp, EINVAL);
+
+#ifdef EVIO_BLOCK_SUBSET_EXTENSION
+   // map back to the virtual file offset on output
+   if (startoff > 0) {
+      size_t preset = fp->getEVIOprestartData();
+      curroffset -= startoff - preset;
+   }
+#endif
 
 // All done
 //
@@ -870,15 +892,19 @@ ssize_t XrdPosixXrootd::Read(int fildes, void *buf, size_t nbyte)
 // even though they are actually coming from somewere in the middle.
 //
 // 1. Respond to the user's first read by feeding the first chunk
-//    containing the PRESTART into the application buffer.
-// 2. Follow this by a second chunk containing just the BOR followed by
+//    containing the first event bank into the application buffer.
+// 2. Check the tag on the first event bank. If the tag number is 112
+//    then it was the BOR, so the preamble is complete, go to step 4.
+//    Otherwise proceed to step 3.
+// 3. Follow this by a second chunk containing just the BOR followed by
 //    the GO record. To do this, I will need to modify the block length
 //    and event count in the chunk header to remove all of the physics
 //    events from the end of the chunk, leaving only the BOR + GO.
-// 3. Following this second chunk, seek downstream in the input file
+// 4. Following this preamble, seek downstream in the input file
 //    to the start of the chunk indicated by the offset requested by
 //    the user, and proceed reading data from the file from there. 
 
+   off_t curroffset = Lseek(fp->FDNum(), 0, SEEK_CUR);
    long skipblocks = fp->getEVIOblockSubsetStart();
    off_t startoff = fp->getEVIOblockOffsetStart();
    long stopblocks = fp->getEVIOblockSubsetStop();
@@ -924,18 +950,23 @@ ssize_t XrdPosixXrootd::Read(int fildes, void *buf, size_t nbyte)
       }
       Read(fildes, prebuf3 + 4, bank3);
       unsigned int chunk2 = 36 + bank2 + 4 + bank3;
-      fp->setEVIOprestartData(prebuf, chunk + chunk2);
-      // Adjust the header of chunk 2 so it contains
-      // only these two records, BOR and GO.
-      prebuf += chunk;
-      prebuf[0] = (chunk2 >> 26) & 0xff;
-      prebuf[1] = (chunk2 >> 18) & 0xff;
-      prebuf[2] = (chunk2 >> 10) & 0xff;
-      prebuf[3] = (chunk2 >> 2) & 0xff;
-      prebuf[16] = 0;
-      prebuf[17] = 0;
-      prebuf[18] = 0;
-      prebuf[19] = 2;
+      if ((prebuf[36] << 8) + prebuf[37] == 0x70) {
+         fp->setEVIOprestartData(prebuf, chunk);
+      }
+      else {
+         fp->setEVIOprestartData(prebuf, chunk + chunk2);
+         // Adjust the header of chunk 2 so it contains
+         // only these two records, BOR and GO.
+         prebuf += chunk;
+         prebuf[0] = (chunk2 >> 26) & 0xff;
+         prebuf[1] = (chunk2 >> 18) & 0xff;
+         prebuf[2] = (chunk2 >> 10) & 0xff;
+         prebuf[3] = (chunk2 >> 2) & 0xff;
+         prebuf[12] = 0;
+         prebuf[13] = 0;
+         prebuf[14] = 0;
+         prebuf[15] = 2;
+      }
       // Advance the read pointer to the start of the 
       // chunk of physics events we want to consume.
       off_t pos = Lseek(fp->FDNum(), 0, SEEK_SET);
@@ -946,23 +977,19 @@ ssize_t XrdPosixXrootd::Read(int fildes, void *buf, size_t nbyte)
             break;
          }
          unsigned int length = SWAB(evio_block_hdr);
-         unsigned int events = SWAB(evio_block_hdr + 12);
          unsigned int magic = SWAB(evio_block_hdr + 28);
          if (magic != 0xc0da0100 || length < 8) {
             pos = Lseek(fp->FDNum(), 0, SEEK_END);
             break;
          }
          pos += length * 4;
-         std::cout << "XrdPosixXrootd::Read skipping block of " 
-                   << events << " events, length "
-                   << length * 4 << " bytes" << std::endl;
          pos = Lseek(fp->FDNum(), pos, SEEK_SET);
       }
       startoff = pos;
       stopoff = 0;
-      fp->setEVIOblockOffsetLimits(startoff, stopoff);
       fp->setEVIOblockSubsetLimits(skipblocks, stopblocks);
    }
+
    if (stopblocks > 0 && stopoff == 0) {
       fp->setEVIOblockSubsetLimits(0,0);
       // Advance the read pointer to the start of the 
@@ -975,43 +1002,42 @@ ssize_t XrdPosixXrootd::Read(int fildes, void *buf, size_t nbyte)
             break;
          }
          unsigned int length = SWAB(evio_block_hdr);
-         unsigned int events = SWAB(evio_block_hdr + 12);
          unsigned int magic = SWAB(evio_block_hdr + 28);
          if (magic != 0xc0da0100 || length < 8) {
             pos = Lseek(fp->FDNum(), 0, SEEK_END);
             break;
          }
          pos += length * 4;
-         std::cout << "XrdPosixXrootd::Read scanning block of " 
-                   << events << " events, length "
-                   << length * 4 << " bytes" << std::endl;
          pos = Lseek(fp->FDNum(), pos, SEEK_SET);
       }
       stopoff = pos;
-      Lseek(fp->FDNum(), startoff, SEEK_SET);
-      fp->setEVIOblockOffsetLimits(startoff, stopoff);
       fp->setEVIOblockSubsetLimits(skipblocks, stopblocks);
    }
-   if (skipblocks > 0 && fp->hasEVIOprestartData()) {
-      // Feed from the prestart buffer until it is empty,
-      // then fall through to reading from the file.
-      size_t npre = fp->getEVIOprestartData((unsigned char*)buf, nbyte);
-      size_t nleft = nbyte - npre;
-      if (nleft > 0) {
-         size_t nres = Read(fildes, (char*)buf + npre, nleft);
-         if (nres > 0)
-            return npre + nres;
-         else
-            return nres;
+
+   fp->setEVIOblockOffsetLimits(startoff, stopoff);
+   off_t pos = Lseek(fp->FDNum(), curroffset, SEEK_SET);
+
+   if (startoff > 0) {
+      // Map the physical file onto a virtual address space starting
+      // at zero in the prestart buffer, and continuing after that
+      // with the first block following startoff in the file.
+      unsigned char *p;
+      size_t npre = fp->getEVIOprestartData(&p);
+      if (pos < (long int)npre) {
+         npre = (nbyte < npre - pos)? nbyte : npre - pos;
+         memcpy(buf, p + pos, npre);
+         Lseek(fp->FDNum(), npre, SEEK_CUR);
+         long int npost = nbyte - npre;
+         if (npost > 0) {
+            npost = Read(fildes, (unsigned char*)buf + npre, npost);
+         }
+         fp->UnLock();
+         return npre + npost;
       }
-      return nbyte;
    }
-   else if (stopblocks > 0) {
-      off_t pos = Lseek(fp->FDNum(), 0, SEEK_CUR);
-      if (pos >= stopoff)
-         pos = Lseek(fp->FDNum(), 0, SEEK_END);
-      else if ((signed long)nbyte > stopoff - pos)
-         nbyte = stopoff - pos;
+   if (stopblocks > 0) {
+      off_t pstop = stopoff - startoff + fp->getEVIOprestartData();
+      nbyte = ((off_t)nbyte >= pstop - pos)? pstop - pos : nbyte;
    }
 #endif
 

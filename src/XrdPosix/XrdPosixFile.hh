@@ -200,26 +200,16 @@ static const int isUpdt = 4;
                         blockSubsetMarker[0] = start;
                         blockSubsetMarker[1] = stop;
                      }
-       long int      getEVIOprestartData(unsigned char *buf, long int nbytes)
+       long int      getEVIOprestartData(unsigned char **buf=0)
                      {
-                        if (nbytes > prestartBufferCount)
-                           nbytes = prestartBufferCount;
-                        memcpy(buf, prestartReadptr, nbytes);
-                        prestartReadptr += nbytes;
-                        prestartBufferCount -= nbytes;
-                        if (prestartBufferCount == 0) {
-                           free(prestartBuffer);
-                           prestartBuffer = 0;
-                        }
-                        return nbytes;
+                        if (buf) *buf = prestartBuffer;
+                        return prestartBufferCount;
                      }
        void          setEVIOprestartData(unsigned char *buf, long unsigned int nbytes)
                      {
                         prestartBuffer = buf;
-                        prestartReadptr = buf;
                         prestartBufferCount = nbytes;
                      }
-       long          hasEVIOprestartData() {return prestartBufferCount;}
 #endif
 
 private:
@@ -240,7 +230,6 @@ long int    blockSubsetStart;
 long int    blockSubsetStop;
 off_t       blockSubsetMarker[2];
 unsigned char* prestartBuffer;
-unsigned char* prestartReadptr;
 long int    prestartBufferCount;
 #endif
 };
