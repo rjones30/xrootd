@@ -916,39 +916,40 @@ ssize_t XrdPosixXrootd::Read(int fildes, void *buf, size_t nbyte)
       // Read the 4-byte word count of the first chunk
       Read(fildes, prebuf, 4);
       int chunk = SWAB(prebuf) * 4;
+      int b2 = chunk + 32;
       // Read through the 32-byte header of the second chunk
       // to get the word count of the first bank in chunk 2
-      while (chunk + 36 > prestartBufsize) {
+      while (4 + b2 > prestartBufsize) {
          prestartBufsize *= 2;
          unsigned char *p = (unsigned char*)malloc(prestartBufsize);
          memcpy(p, prebuf, 4);
          free(prebuf);
          prebuf = p;
       }
-      Read(fildes, prebuf + 4, chunk + 32);
-      unsigned char *prebuf2 = prebuf + chunk + 32;
-      int bank2 = SWAB(prebuf2) * 4;
+      Read(fildes, prebuf + 4, b2);
+      int bank2 = SWAB(prebuf + b2) * 4;
+      int b3 = bank2 + 4;
       // Read through the contents of the first chunk 2 bank 
       // to get the word count of the second bank in chunk 2
-      while (chunk + 36 + bank2 + 4 > prestartBufsize) {
+      while (4 + b2 + b3 > prestartBufsize) {
          prestartBufsize *= 2;
          unsigned char *p = (unsigned char*)malloc(prestartBufsize);
-         memcpy(p, prebuf, chunk + 36);
+         memcpy(p, prebuf, 4 + b2);
          free(prebuf);
          prebuf = p;
       }
-      Read(fildes, prebuf2 + 4, bank2 + 4);
-      unsigned char *prebuf3 = prebuf2 + bank2 + 4;
-      int bank3 = SWAB(prebuf3) * 4;
+      Read(fildes, prebuf + 4 + b2, b3);
+      int bank3 = SWAB(prebuf + b2 + b3) * 4;
+      int b4 = bank3;
       // Read through the contents of the chunk 2 bank 2
-      while (chunk + 36 + bank2 + 4 + bank3 > prestartBufsize) {
+      while (4 + b2 + b3 + b4 > prestartBufsize) {
          prestartBufsize *= 2;
          unsigned char *p = (unsigned char*)malloc(prestartBufsize);
-         memcpy(p, prebuf, chunk + 36 + bank2 + 4);
+         memcpy(p, prebuf, 4 + b2 + b3);
          free(prebuf);
          prebuf = p;
       }
-      Read(fildes, prebuf3 + 4, bank3);
+      Read(fildes, prebuf + 4 + b2 + b3, b4);
       unsigned int chunk2 = 36 + bank2 + 4 + bank3;
       if ((prebuf[36] << 8) + prebuf[37] == 0x70) {
          fp->setEVIOprestartData(prebuf, chunk);
