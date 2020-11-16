@@ -131,7 +131,7 @@ XrdPosixFile::XrdPosixFile(bool &aOK, const char *path, XrdPosixCallBack *cbP,
 // the reading should stop.
    setEVIOblockOffsetLimits(0,0);
    setEVIOblockSubsetLimits(0,0);
-   setEVIOprestartData(0,0);
+   setEVIOpreambleData(0,0);
    char* p = (char*)path;
    long int start(0);
    long int stop(0);
@@ -204,7 +204,7 @@ XrdPosixFile::~XrdPosixFile()
 
 #ifdef EVIO_BLOCK_SUBSET_EXTENSION
    unsigned char *buf;
-   getEVIOprestartData(&buf);
+   getEVIOpreambleData(&buf);
    if (buf) free(buf);
 #endif
 }

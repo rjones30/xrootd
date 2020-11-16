@@ -200,15 +200,15 @@ static const int isUpdt = 4;
                         blockSubsetMarker[0] = start;
                         blockSubsetMarker[1] = stop;
                      }
-       long int      getEVIOprestartData(unsigned char **buf=0)
+       long int      getEVIOpreambleData(unsigned char **buf=0)
                      {
-                        if (buf) *buf = prestartBuffer;
-                        return prestartBufferCount;
+                        if (buf) *buf = preambleBuffer;
+                        return preambleBufferCount;
                      }
-       void          setEVIOprestartData(unsigned char *buf, long unsigned int nbytes)
+       void          setEVIOpreambleData(unsigned char *buf, long unsigned int nbytes)
                      {
-                        prestartBuffer = buf;
-                        prestartBufferCount = nbytes;
+                        preambleBuffer = buf;
+                        preambleBufferCount = nbytes;
                      }
 #endif
 
@@ -229,8 +229,8 @@ char        isStream;
 long int    blockSubsetStart;
 long int    blockSubsetStop;
 off_t       blockSubsetMarker[2];
-unsigned char* prestartBuffer;
-long int    prestartBufferCount;
+unsigned char* preambleBuffer;
+long int    preambleBufferCount;
 #endif
 };
 #endif
