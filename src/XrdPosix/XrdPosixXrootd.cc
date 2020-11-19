@@ -1010,10 +1010,12 @@ ssize_t XrdPosixXrootd::Read(int fildes, void *buf, size_t nbyte)
       fp->setEVIOblockSubsetLimits(0,0);
       // Advance the read pointer to the start of the 
       // chunk of physics events we want to consume.
+      off_t peof = Lseek(fp->FDNum(), 0, SEEK_END);
       off_t pos = Lseek(fp->FDNum(), startoff, SEEK_SET);
       for (int i=skipblocks; i < stopblocks; ++i) {
          unsigned char evio_block_hdr[32];
          if (Read(fildes, evio_block_hdr, 32) != 32) {
+            // only reach here if file is improperly terminated
             pos = Lseek(fp->FDNum(), 0, SEEK_END);
             break;
          }
@@ -1023,8 +1025,13 @@ ssize_t XrdPosixXrootd::Read(int fildes, void *buf, size_t nbyte)
             pos = Lseek(fp->FDNum(), 0, SEEK_END);
             break;
          }
-         pos += length * 4;
-         pos = Lseek(fp->FDNum(), pos, SEEK_SET);
+         if (pos + length * 4 < peof) {
+            pos += length * 4;
+            pos = Lseek(fp->FDNum(), pos, SEEK_SET);
+         }
+         else {
+            break;
+         }
       }
       savedoffset = 0;
       stopoff = pos;
