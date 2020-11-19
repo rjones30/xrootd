@@ -132,7 +132,10 @@ namespace XrdCl
   XRootDStatus Tls::Connect( const std::string &thehost, XrdNetAddrInfo *netInfo )
   {
     std::string errmsg;
-    XrdTls::RC error = pTls->Connect( thehost.c_str(), &errmsg );
+    const char *verhost = 0;
+    if( thehost != "localhost" && thehost != "127.0.0.1" && thehost != "[::1]" )
+      verhost = thehost.c_str();
+    XrdTls::RC error = pTls->Connect( verhost, &errmsg );
     XRootDStatus status = ToStatus( error );
     if( !status.IsOK() )
       status.SetErrorMessage( errmsg );
@@ -316,11 +319,11 @@ namespace XrdCl
       case XrdTls::TLS_WantWrite:
       case XrdTls::TLS_WantRead:  return XRootDStatus( stOK, suRetry, 0, msg );
 
-      case XrdTls::TLS_SSL_Error:
       case XrdTls::TLS_UNK_Error:
       case XrdTls::TLS_SYS_Error: return XRootDStatus( stError, errTlsError, errno, msg );
 
       case XrdTls::TLS_VER_Error:
+      case XrdTls::TLS_SSL_Error:
       case XrdTls::TLS_HNV_Error: return XRootDStatus( stFatal, errTlsError, errno, msg );
 
       default:

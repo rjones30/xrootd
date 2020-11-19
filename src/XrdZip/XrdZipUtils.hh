@@ -25,9 +25,9 @@
 #ifndef SRC_XRDZIP_XRDZIPUTILS_HH_
 #define SRC_XRDZIP_XRDZIPUTILS_HH_
 
-#include <time.h>
 #include <string.h>
 
+#include <ctime>
 #include <vector>
 #include <algorithm>
 #include <iterator>
@@ -52,7 +52,7 @@ namespace XrdZip
   // Copies integer byte by byte into a buffer
   //---------------------------------------------------------------------------
   template<typename INT>
-  inline static void copy_bytes( const INT &value, buffer_t &buffer)
+  inline static void copy_bytes( const INT value, buffer_t &buffer)
   {
     const char *begin = reinterpret_cast<const char*>( &value );
     const char *end   = begin + sizeof( INT );
