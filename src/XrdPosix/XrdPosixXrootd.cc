@@ -1050,6 +1050,10 @@ ssize_t XrdPosixXrootd::Read(int fildes, void *buf, size_t nbyte)
       fp->UnLock();
       return 0;
    }
+   if (startoff > 0 && startoff >= stopoff) {
+      fp->UnLock();
+      return 0;
+   }
 
    if (startoff > 0) {
       // Map the physical file onto a virtual address space starting
