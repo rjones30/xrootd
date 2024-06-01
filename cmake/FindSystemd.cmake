@@ -27,4 +27,4 @@ set(SYSTEMD_INCLUDE_DIRS ${SYSTEMD_INCLUDE_DIR})
 set(SYSTEMD_LIBRARIES ${SYSTEMD_LIBRARY})
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(systemd DEFAULT_MSG SYSTEMD_INCLUDE_DIRS SYSTEMD_LIBRARIES)
+find_package_handle_standard_args(Systemd DEFAULT_MSG SYSTEMD_INCLUDE_DIRS SYSTEMD_LIBRARIES)

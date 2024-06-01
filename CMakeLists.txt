@@ -9,9 +9,9 @@ set( CMAKE_MODULE_PATH
  ${PROJECT_SOURCE_DIR}/src
  ${PROJECT_SOURCE_DIR}/cmake )
 
-if(NOT (CMAKE_VERSION VERSION_LESS "3.1"))
-  cmake_policy(SET CMP0054 OLD)
-endif()
+#if(NOT (CMAKE_VERSION VERSION_LESS "3.1"))
+#  cmake_policy(SET CMP0054 OLD)
+#endif()
 
 include( XRootDUtils )
 CheckBuildDirectory()
@@ -22,6 +22,8 @@ include( XRootDSystemCheck )
 include( XRootDFindLibs )
 
 add_definitions( -DXRDPLUGIN_SOVERSION="${PLUGIN_VERSION}" )
+
+set(CMAKE_INSTALL_LIBDIR "${CMAKE_INSTALL_PREFIX}/lib64")
 
 #-------------------------------------------------------------------------------
 # Generate the version header
