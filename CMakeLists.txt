@@ -1,25 +1,13 @@
 #-------------------------------------------------------------------------------
 # Project description
 #-------------------------------------------------------------------------------
-cmake_minimum_required( VERSION 2.6 )
-
-IF(CMAKE_VERSION VERSION_GREATER "2.8.12")
-   CMAKE_POLICY(SET CMP0022 OLD)
-ENDIF()
+cmake_minimum_required( VERSION 3.1 )
 
 project( XRootD )
 
 set( CMAKE_MODULE_PATH
  ${PROJECT_SOURCE_DIR}/src
  ${PROJECT_SOURCE_DIR}/cmake )
-
-if(NOT (CMAKE_VERSION VERSION_LESS "3.1"))
-  cmake_policy(SET CMP0054 OLD)
-endif()
-
-if(CMAKE_VERSION VERSION_LESS "3.0")
-  SET(CMAKE_DL_LIBS "-ldl")
-endif()
 
 include( XRootDUtils )
 CheckBuildDirectory()
@@ -30,6 +18,13 @@ include( XRootDSystemCheck )
 include( XRootDFindLibs )
 
 add_definitions( -DXRDPLUGIN_SOVERSION="${PLUGIN_VERSION}" )
+
+# changes to make stable-4.12.x build with a recent release of cmake [rtj]
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -fpermissive -Wno-error=deprecated-declarations -D_STAT_VER=3")
+set(CMAKE_INSTALL_LIBDIR "${CMAKE_INSTALL_PREFIX}/lib64")
+set(CMAKE_INSTALL_DATADIR "${CMAKE_INSTALL_PREFIX}/lib")
+set(CMAKE_INSTALL_MANDIR "${CMAKE_INSTALL_PREFIX}/share/man")
+set(CMAKE_INSTALL_INCLUDEDIR "${CMAKE_INSTALL_PREFIX}/include")
 
 #-------------------------------------------------------------------------------
 # Generate the version header

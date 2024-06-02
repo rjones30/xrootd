@@ -898,7 +898,7 @@ int XrdCryptosslX509SignProxyReq(XrdCryptoX509 *xcpi, XrdCryptoRSA *kcpi,
       return -kErrPX_BadEECkey;
    }
    // Point to the cerificate
-   RSA *kpi = EVP_PKEY_get0_RSA((EVP_PKEY *)(kcpi->Opaque()));
+   RSA *kpi = (RSA*)EVP_PKEY_get0_RSA((EVP_PKEY *)(kcpi->Opaque()));
    //
    // Set the key into the request
    EVP_PKEY *ekpi = EVP_PKEY_new();

@@ -503,7 +503,7 @@ int XrdCryptosslRSA::EncryptPrivate(const char *in, int lin, char *out, int lout
       int lc = (len > lcmax) ? lcmax : len ;
       if ((lout = RSA_private_encrypt(lc, (unsigned char *)&in[kk],
                                           (unsigned char *)&out[ke],
-                                      EVP_PKEY_get0_RSA(fEVP), RSA_PKCS1_PADDING)) < 0) {
+                                      (RSA*)EVP_PKEY_get0_RSA(fEVP), RSA_PKCS1_PADDING)) < 0) {
          char serr[120];
          ERR_error_string(ERR_get_error(), serr);
          DEBUG("error: " <<serr);
@@ -554,7 +554,7 @@ int XrdCryptosslRSA::EncryptPublic(const char *in, int lin, char *out, int loutm
       int lc = (len > lcmax) ? lcmax : len ;
       if ((lout = RSA_public_encrypt(lc, (unsigned char *)&in[kk],
                                          (unsigned char *)&out[ke],
-                                     EVP_PKEY_get0_RSA(fEVP), RSA_PKCS1_OAEP_PADDING)) < 0) {
+                                  (RSA*)EVP_PKEY_get0_RSA(fEVP), RSA_PKCS1_OAEP_PADDING)) < 0) {
          char serr[120];
          ERR_error_string(ERR_get_error(), serr);
          DEBUG("error: " <<serr);
@@ -604,7 +604,7 @@ int XrdCryptosslRSA::DecryptPrivate(const char *in, int lin, char *out, int lout
    while (len > 0 && ke <= (loutmax - lout)) {
       if ((lout = RSA_private_decrypt(lcmax, (unsigned char *)&in[kk],
                                              (unsigned char *)&out[ke],
-                                      EVP_PKEY_get0_RSA(fEVP), RSA_PKCS1_OAEP_PADDING)) < 0) {
+                                   (RSA*)EVP_PKEY_get0_RSA(fEVP), RSA_PKCS1_OAEP_PADDING)) < 0) {
          char serr[120];
          ERR_error_string(ERR_get_error(), serr);
          DEBUG("error: " <<serr);
@@ -653,7 +653,7 @@ int XrdCryptosslRSA::DecryptPublic(const char *in, int lin, char *out, int loutm
    while (len > 0 && ke <= (loutmax - lout)) {
       if ((lout = RSA_public_decrypt(lcmax, (unsigned char *)&in[kk],
                                             (unsigned char *)&out[ke],
-                                     EVP_PKEY_get0_RSA(fEVP), RSA_PKCS1_PADDING)) < 0) {
+                                     (RSA*)EVP_PKEY_get0_RSA(fEVP), RSA_PKCS1_PADDING)) < 0) {
          char serr[120];
          ERR_error_string(ERR_get_error(), serr);
          PRINT("error: " <<serr);
