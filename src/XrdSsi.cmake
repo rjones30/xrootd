@@ -174,5 +174,5 @@ set_target_properties(
 # Install
 #-------------------------------------------------------------------------------
 install(
-  TARGETS XrdSsiLib XrdSsi_static XrdSsiShMap XrdSsiShMap_static ${LIB_XRD_SSI} ${LIB_XRD_SSILOG}
+  TARGETS XrdSsiLib XrdSsiLib_static XrdSsiShMap XrdSsiShMap_static ${LIB_XRD_SSI} ${LIB_XRD_SSILOG}
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} )

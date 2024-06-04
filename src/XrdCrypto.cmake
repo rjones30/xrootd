@@ -134,7 +134,7 @@ endif()
 # Install
 #-------------------------------------------------------------------------------
 install(
-  TARGETS XrdCrypto XrdCyrpto_static XrdCryptoLite XrdCryptoLite_static
+  TARGETS XrdCrypto XrdCrypto_static XrdCryptoLite XrdCryptoLite_static
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} )
 
 if( BUILD_CRYPTO )
