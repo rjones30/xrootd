@@ -33,6 +33,22 @@ add_library(
   XrdCrypto/XrdCryptoX509Req.cc           XrdCrypto/XrdCryptoX509Req.hh
   XrdCrypto/XrdCryptogsiX509Chain.cc      XrdCrypto/XrdCryptogsiX509Chain.hh )
 
+add_library(
+  XrdCrypto_static
+  STATIC
+  XrdCrypto/XrdCryptoAux.cc               XrdCrypto/XrdCryptoAux.hh
+  XrdCrypto/XrdCryptoTrace.hh
+  XrdCrypto/XrdCryptoBasic.cc             XrdCrypto/XrdCryptoBasic.hh
+  XrdCrypto/XrdCryptoCipher.cc            XrdCrypto/XrdCryptoCipher.hh
+  XrdCrypto/XrdCryptoFactory.cc           XrdCrypto/XrdCryptoFactory.hh
+  XrdCrypto/XrdCryptoMsgDigest.cc         XrdCrypto/XrdCryptoMsgDigest.hh
+  XrdCrypto/XrdCryptoRSA.cc               XrdCrypto/XrdCryptoRSA.hh
+  XrdCrypto/XrdCryptoX509.cc              XrdCrypto/XrdCryptoX509.hh
+  XrdCrypto/XrdCryptoX509Chain.cc         XrdCrypto/XrdCryptoX509Chain.hh
+  XrdCrypto/XrdCryptoX509Crl.cc           XrdCrypto/XrdCryptoX509Crl.hh
+  XrdCrypto/XrdCryptoX509Req.cc           XrdCrypto/XrdCryptoX509Req.hh
+  XrdCrypto/XrdCryptogsiX509Chain.cc      XrdCrypto/XrdCryptogsiX509Chain.hh )
+
 target_link_libraries(
   XrdCrypto
   XrdUtils
@@ -52,6 +68,12 @@ set_target_properties(
 add_library(
   XrdCryptoLite
   SHARED
+  XrdCrypto/XrdCryptoLite.cc              XrdCrypto/XrdCryptoLite.hh
+  XrdCrypto/XrdCryptoLite_bf32.cc )
+
+add_library(
+  XrdCryptoLite_static
+  STATIC
   XrdCrypto/XrdCryptoLite.cc              XrdCrypto/XrdCryptoLite.hh
   XrdCrypto/XrdCryptoLite_bf32.cc )
 
@@ -112,7 +134,7 @@ endif()
 # Install
 #-------------------------------------------------------------------------------
 install(
-  TARGETS XrdCrypto XrdCryptoLite
+  TARGETS XrdCrypto XrdCyrpto_static XrdCryptoLite XrdCryptoLite_static
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} )
 
 if( BUILD_CRYPTO )

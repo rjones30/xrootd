@@ -37,6 +37,18 @@ add_library(
   XrdXml/XrdXmlReader.cc           XrdXml/XrdXmlReader.hh
   ${XRDXML2_READER_FILES} )
 
+add_library(
+  XrdXml_static
+  STATIC
+  XrdXml/tinystr.cpp               XrdXml/tinystr.h
+  XrdXml/tinyxml.cpp               XrdXml/tinyxml.h
+  XrdXml/tinyxmlerror.cpp
+  XrdXml/tinyxmlparser.cpp
+  XrdXml/XrdXmlMetaLink.cc         XrdXml/XrdXmlMetaLink.hh
+  XrdXml/XrdXmlRdrTiny.cc          XrdXml/XrdXmlRdrTiny.hh
+  XrdXml/XrdXmlReader.cc           XrdXml/XrdXmlReader.hh
+  ${XRDXML2_READER_FILES} )
+
 target_link_libraries(
   XrdXml
   XrdUtils
@@ -64,5 +76,5 @@ endif()
 # Install
 #-------------------------------------------------------------------------------
 install(
-  TARGETS XrdXml
+  TARGETS XrdXml XrdXml_static
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} )

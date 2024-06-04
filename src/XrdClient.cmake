@@ -39,6 +39,35 @@ add_library(
   XrdClient/XrdClientReadV.cc          XrdClient/XrdClientReadV.hh
   XrdClient/XrdClientReadAhead.cc      XrdClient/XrdClientReadAhead.hh )
 
+add_library(
+  XrdClient_static
+  STATIC
+  XrdClient/XrdClientAbs.cc            XrdClient/XrdClientAbs.hh
+  XrdClient/XrdClient.cc               XrdClient/XrdClient.hh
+  XrdClient/XrdClientSock.cc           XrdClient/XrdClientSock.hh
+  XrdClient/XrdClientPSock.cc          XrdClient/XrdClientPSock.hh
+  XrdClient/XrdClientConn.cc           XrdClient/XrdClientConn.hh
+  XrdClient/XrdClientConnMgr.cc        XrdClient/XrdClientConnMgr.hh
+                                       XrdClient/XrdClientUnsolMsg.hh
+  XrdClient/XrdClientDebug.cc          XrdClient/XrdClientDebug.hh
+  XrdClient/XrdClientInputBuffer.cc    XrdClient/XrdClientInputBuffer.hh
+  XrdClient/XrdClientLogConnection.cc  XrdClient/XrdClientLogConnection.hh
+  XrdClient/XrdClientPhyConnection.cc  XrdClient/XrdClientPhyConnection.hh
+  XrdClient/XrdClientMessage.cc        XrdClient/XrdClientMessage.hh
+  XrdClient/XrdClientProtocol.cc       XrdClient/XrdClientProtocol.hh
+  XrdClient/XrdClientReadCache.cc      XrdClient/XrdClientReadCache.hh
+  XrdClient/XrdClientUrlInfo.cc        XrdClient/XrdClientUrlInfo.hh
+  XrdClient/XrdClientUrlSet.cc         XrdClient/XrdClientUrlSet.hh
+  XrdClient/XrdClientThread.cc         XrdClient/XrdClientThread.hh
+  XrdClient/XrdClientAdmin.cc          XrdClient/XrdClientAdmin.hh
+                                       XrdClient/XrdClientVector.hh
+  XrdClient/XrdClientEnv.cc            XrdClient/XrdClientEnv.hh
+                                       XrdClient/XrdClientConst.hh
+  XrdClient/XrdClientSid.cc            XrdClient/XrdClientSid.hh
+  XrdClient/XrdClientMStream.cc        XrdClient/XrdClientMStream.hh
+  XrdClient/XrdClientReadV.cc          XrdClient/XrdClientReadV.hh
+  XrdClient/XrdClientReadAhead.cc      XrdClient/XrdClientReadAhead.hh )
+
 target_link_libraries(
   XrdClient
   XrdUtils
@@ -98,7 +127,7 @@ target_link_libraries(
 # Install
 #-------------------------------------------------------------------------------
 install(
-  TARGETS XrdClient xrd xprep xrdstagetool
+  TARGETS XrdClient XrdClient_static xrd xprep xrdstagetool
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} )
 

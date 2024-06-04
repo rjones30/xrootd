@@ -33,6 +33,18 @@ if( BUILD_HTTP )
     XrdHttp/XrdHttpUtils.cc       XrdHttp/XrdHttpUtils.hh )
 
   add_library(
+    "${LIB_XRD_HTTP_UTILS}_static"
+    STATIC
+    XrdHttp/XrdHttpProtocol.cc    XrdHttp/XrdHttpProtocol.hh
+    XrdHttp/XrdHttpSecurity.cc
+    XrdHttp/XrdHttpReq.cc         XrdHttp/XrdHttpReq.hh
+                                  XrdHttp/XrdHttpSecXtractor.hh
+    XrdHttp/XrdHttpExtHandler.cc  XrdHttp/XrdHttpExtHandler.hh
+                                  XrdHttp/XrdHttpStatic.hh
+    XrdHttp/XrdHttpTrace.cc       XrdHttp/XrdHttpTrace.hh
+    XrdHttp/XrdHttpUtils.cc       XrdHttp/XrdHttpUtils.hh )
+
+  add_library(
     ${MOD_XRD_HTTP}
     MODULE
     XrdHttp/XrdHttpModule.cc )
@@ -71,7 +83,7 @@ if( BUILD_HTTP )
   # Install
   #-----------------------------------------------------------------------------
   install(
-    TARGETS ${LIB_XRD_HTTP_UTILS} ${MOD_XRD_HTTP}
+    TARGETS ${LIB_XRD_HTTP_UTILS} "${LIB_XRD_HTTP_UTILS}_static" ${MOD_XRD_HTTP}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} )
 
 endif()
