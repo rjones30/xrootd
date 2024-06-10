@@ -39,6 +39,10 @@
 #include <fcntl.h>
 #include <sys/times.h>
 
+#ifdef __CYGWIN__
+#include <crypt.h>
+#endif
+
 #include "XrdVersion.hh"
 
 #include "XrdSys/XrdSysHeaders.hh"

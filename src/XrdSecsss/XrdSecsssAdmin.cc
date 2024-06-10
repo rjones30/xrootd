@@ -46,6 +46,12 @@
 
 #include "XrdSecsss/XrdSecsssKT.hh"
   
+#ifdef __CYGWIN__
+char      *strptime (const char *__restrict,
+				 const char *__restrict,
+				 struct tm *__restrict);
+#endif
+
 /******************************************************************************/
 /*                               D e f i n e s                                */
 /******************************************************************************/

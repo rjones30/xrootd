@@ -46,6 +46,10 @@
 #include "XrdSys/XrdSysError.hh"
 #include "XrdSys/XrdSysPthread.hh"
 
+#ifndef IOV_MAX
+#define IOV_MAX 1024
+#endif
+
 using namespace XrdCms;
 
 /******************************************************************************/

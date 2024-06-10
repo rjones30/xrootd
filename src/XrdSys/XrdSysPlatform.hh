@@ -40,6 +40,14 @@
 #include <byteswap.h>
 #define MAXNAMELEN NAME_MAX
 #endif
+#ifdef __CYGWIN__
+#include <memory.h>
+#include <string.h>
+#include <sys/types.h>
+//#include <asm/param.h>
+#include <byteswap.h>
+#define MAXNAMELEN NAME_MAX
+#endif
 #ifdef __APPLE__
 #include <AvailabilityMacros.h>
 #include <sys/types.h>
@@ -68,7 +76,7 @@
 #define __USE_LEGACY_PROTOTYPES__ 1
 #endif
 
-#if defined(__linux__) || defined(__APPLE__) || defined(__FreeBSD__)
+#if defined(__linux__) || defined(__APPLE__) || defined(__FreeBSD__) || defined(__CYGWIN__)
 
 #define S_IAMB      0x1FF   /* access mode bits */
 
@@ -249,7 +257,9 @@ extern "C"
 #define MAKEDIR(path,mode) mkdir(path)
 #define net_errno WSAGetLastError()
 #else
+#ifndef O_BINARY
 #define O_BINARY 0
+#endif
 #define Netdata_t char *
 #define Sokdata_t void *
 #define IOV_INIT(data,dlen) data,dlen

@@ -61,6 +61,13 @@
 #define FS_BLKSZ f_bsize
 #define FS_FFREE f_ffree
 #endif
+#ifdef __CYGWIN__
+#include <sys/statfs.h>
+#define STATFS_t struct statfs
+#define FS_Stat(a,b) statfs(a,b)
+#define FS_BLKSZ f_bsize
+#define FS_FFREE f_ffree
+#endif
 #if defined(__APPLE__) || defined(__FreeBSD__)
 #include <sys/param.h>
 #include <sys/mount.h>

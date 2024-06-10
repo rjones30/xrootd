@@ -32,11 +32,13 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <vector>
+#ifndef __CYGWIN__
 #include <sys/syscall.h>
 
 #ifdef __GNUC__
 #include <execinfo.h>
 #include <cxxabi.h>
+#endif
 #endif
 
 // Linux and MacOS provide actual thread number, others a thread pointer.
@@ -190,7 +192,11 @@ int Demangle(char *cSym, char *buff, int blen)
       return snprintf(buff, blen, "%s\n", cSym);
    *plus = 0;
 
+#ifndef __CYGWIN__
    realname = abi::__cxa_demangle(cSym+1, 0, 0, &status);
+#else
+   realname = cSym+1;
+#endif
 
    if (status) {*plus = '+'; return snprintf(buff, blen, "%s\n", cSym);}
 
@@ -227,6 +233,10 @@ namespace
 {
 void DumpStack(char *bP, int bL, TidType tid)
 {
+#ifdef __CYGWIN__
+   snprintf(bP, bL, "TBT " TidFmt " No stack information available, not gnuc.", tid);
+   return;
+#else
 #ifndef __GNUC__
    snprintf(bP, bL, "TBT " TidFmt " No stack information available, not gnuc.", tid);
    return;
@@ -255,6 +265,7 @@ void DumpStack(char *bP, int bL, TidType tid)
                 }
         bL -= k; bP += k;
        }
+#endif
 #endif
 }
 }

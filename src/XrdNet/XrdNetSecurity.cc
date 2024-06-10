@@ -48,6 +48,14 @@ int innetgr(const char *netgroup, const char *host, const char *user,
 #include "XrdSys/XrdWin32.hh"
 #endif
 
+#ifdef __CYGWIN__
+int innetgr(const char *netgroup, const char *host, const char *user,
+             const char *domain)
+{
+   return 0;
+}
+#endif
+
 #include "XrdNet/XrdNetAddr.hh"
 #include "XrdNet/XrdNetSecurity.hh"
 #include "XrdNet/XrdNetUtils.hh"

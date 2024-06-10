@@ -136,6 +136,10 @@
 #define Args_Fstat64 int, struct stat64 *
 #endif
 
+#ifdef __CYGWIN__
+typedef _off64_t off64_t;
+#endif
+
 #define Symb_Fsync UNIX_PFX "fsync"
 #define Retv_Fsync int
 #define Args_Fsync int

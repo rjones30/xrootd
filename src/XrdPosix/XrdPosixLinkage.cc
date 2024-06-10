@@ -44,6 +44,10 @@
 #include <link.h>
 #endif
 
+#ifdef __CYGWIN__
+#define RTLD_NEXT 0
+#endif
+
 #include <errno.h>
 
 #include "XrdSys/XrdSysHeaders.hh"

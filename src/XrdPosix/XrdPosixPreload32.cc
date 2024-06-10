@@ -491,7 +491,7 @@ int        stat(         const char *path, struct stat *buf)
 /*                                s t a t f s                                 */
 /******************************************************************************/
 
-#if !defined(__solaris__) && !defined(__APPLE__) && !defined(__FreeBSD__)
+#if !defined(__solaris__) && !defined(__APPLE__) && !defined(__FreeBSD__) && !defined(__CYGWIN__)
 extern "C"
 {
 int        statfs(         const char *path, struct statfs *buf)
@@ -519,7 +519,7 @@ int        statfs(         const char *path, struct statfs *buf)
 /*                               s t a t v f s                                */
 /******************************************************************************/
 
-#if !defined(__APPLE__) && !defined(SUNX86) && !defined(__FreeBSD__)
+#if !defined(__APPLE__) && !defined(SUNX86) && !defined(__FreeBSD__) && !defined(__CYGWIN__)
 extern "C"
 {
 int        statvfs(         const char *path, struct statvfs *buf)

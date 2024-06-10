@@ -68,6 +68,7 @@ set_target_properties(
 #-------------------------------------------------------------------------------
 # The XrdPosixPreload library
 #-------------------------------------------------------------------------------
+if(NOT "${CMAKE_SYSTEM_NAME}" MATCHES "CYGWIN")
 add_library(
   XrdPosixPreload
   SHARED
@@ -90,10 +91,17 @@ set_target_properties(
   SOVERSION ${XRD_POSIX_PRELOAD_SOVERSION}
   INTERFACE_LINK_LIBRARIES ""
   LINK_INTERFACE_LIBRARIES "" )
+endif()
 
 #-------------------------------------------------------------------------------
 # Install
 #-------------------------------------------------------------------------------
+if(NOT "${CMAKE_SYSTEM_NAME}" MATCHES "CYGWIN")
 install(
   TARGETS XrdPosix XrdPosixPreload XrdPosix_static
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} )
+else()
+install(
+  TARGETS XrdPosix XrdPosix_static
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} )
+endif()

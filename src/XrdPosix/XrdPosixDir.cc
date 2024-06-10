@@ -73,6 +73,7 @@ dirent64 *XrdPosixDir::nextEntry(dirent64 *dp)
 #ifndef __solaris__
    dp->d_type   = DT_DIR;
 #endif
+#ifndef __CYGWIN__
 #if defined(__APPLE__) || defined(__FreeBSD__)
    dp->d_fileno = nxtEnt;
    dp->d_namlen = d_nlen;
@@ -81,6 +82,7 @@ dirent64 *XrdPosixDir::nextEntry(dirent64 *dp)
    dp->d_off    = nxtEnt;
 #endif
    dp->d_reclen = d_nlen + dirhdrln;
+#endif
    strncpy(dp->d_name, d_name, d_nlen);
    dp->d_name[d_nlen] = '\0';
    nxtEnt++;

@@ -430,6 +430,8 @@ inline void Wait() {while (sem_wait(&h_semaphore))
                         {abort();}
                     }
 
+int GetValue() {int sval; sem_getvalue(&h_semaphore, &sval); return sval;}
+
 private:
 
 sem_t h_semaphore;

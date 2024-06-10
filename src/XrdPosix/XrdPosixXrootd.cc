@@ -941,13 +941,15 @@ struct dirent* XrdPosixXrootd::Readdir(DIR *dirp)
    dp32 = (struct dirent *)dp64;
    if (dp32->d_name  != dp64->d_name)
       {dp32->d_ino    = dp64->d_ino;
-#if !defined(__APPLE__) && !defined(__FreeBSD__)
+#if !defined(__APPLE__) && !defined(__FreeBSD__) && !defined(__CYGWIN__)
        dp32->d_off     = dp64->d_off;
 #endif
 #ifndef __solaris__
        dp32->d_type   = dp64->d_type;
 #endif
+#ifndef __CYGWIN__
        dp32->d_reclen = dp64->d_reclen;
+#endif
        strcpy(dp32->d_name, dp64->d_name);
       }
    return dp32;
@@ -990,13 +992,15 @@ int XrdPosixXrootd::Readdir_r(DIR *dirp,   struct dirent    *entry,
       {*result = 0; return rc;}
 
    entry->d_ino    = dp64->d_ino;
-#if !defined(__APPLE__) && !defined(__FreeBSD__)
+#if !defined(__APPLE__) && !defined(__FreeBSD__) && !defined(__CYGWIN__)
    entry->d_off    = dp64->d_off;
 #endif
 #ifndef __solaris__
    entry->d_type   = dp64->d_type;
 #endif
+#ifndef __CYGWIN__
    entry->d_reclen = dp64->d_reclen;
+#endif
    strcpy(entry->d_name, dp64->d_name);
    *result = entry;
    return rc;
@@ -1186,7 +1190,9 @@ int XrdPosixXrootd::Statfs(const char *path, struct statfs *buf)
 #if defined(__APPLE__) || defined(__FreeBSD__)
    buf->f_iosize  = myVfs.f_frsize;
 #else
+#ifndef __CYGWIN__
    buf->f_frsize  = myVfs.f_frsize;
+#endif
 #endif
 #if defined(__linux__) || defined(__APPLE__) || defined(__FreeBSD__)
    buf->f_bavail  = myVfs.f_bavail;

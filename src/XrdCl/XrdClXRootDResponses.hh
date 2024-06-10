@@ -29,6 +29,8 @@
 #include <list>
 #include <ctime>
 
+#include <iostream>
+
 namespace XrdCl
 {
   //----------------------------------------------------------------------------
@@ -886,6 +888,9 @@ namespace XrdCl
       {
         (void)status; (void)response;
       }
+
+      virtual void *GetSemaphore() { return this; }
+      virtual int GetSemaphoreValue() { return -1;}
   };
 }
 

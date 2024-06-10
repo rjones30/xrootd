@@ -45,6 +45,10 @@
 #include <sys/vnode.h>
 #endif
 
+#ifdef __CYGWIN__
+#define O_LARGEFILE 0
+#endif 
+
 #include "XrdVersion.hh"
 
 #include "XrdFrc/XrdFrcXAttr.hh"
