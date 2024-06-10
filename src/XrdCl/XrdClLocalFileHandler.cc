@@ -108,6 +108,7 @@ namespace
       static void ThreadHandler( sigval arg )
       {
         std::unique_ptr<AioCtx> me( reinterpret_cast<AioCtx*>( arg.sival_ptr ) );
+std::cerr << "AioCtx::ThreadHandler entered here." << std::endl;
         Handler( std::move( me ) );
       }
 
@@ -168,6 +169,7 @@ namespace
             resp->Set( chunk );
           }
 
+std::cerr << "AioCtx::Handler called with rc==0" << std::endl;
           QueueTask( new XRootDStatus(), resp, me->hosts, me->handler );
         }
       }
@@ -383,10 +385,18 @@ namespace XrdCl
     }
     return QueueTask( new XRootDStatus(), 0, handler );
 #else
+std::cerr << "LocalFileHander::Write entry for semaphore " << handler->GetSemaphore()
+          << " with value=" << handler->GetSemaphoreValue()
+          << " with offset=" << offset << ", size=" << size
+          << " using ResponseHandler " << (void*) handler
+          << std::endl;
+
     AioCtx *ctx = new AioCtx( pHostList, handler );
     ctx->SetWrite( fd, offset, size, buffer );
 
+std::cerr << "LocalFileHander::Write entry to aio_write()" << std::endl;
     int rc = aio_write( *ctx );
+std::cerr << "LocalFileHander::Write return from aio_write() with rc=" << rc << std::endl;
 
     if( rc < 0 )
     {
@@ -540,7 +550,7 @@ namespace XrdCl
     ssize_t bytesWritten = 0;
     while( bytesWritten < size )
     {
-#ifdef __APPLE__
+#if defined(__APPLE__) || defined(__CYGWIN__)
       ssize_t ret = lseek( fd, offset, SEEK_SET );
       if( ret >= 0 )
         ret = writev( fd, iovptr, iovcnt );

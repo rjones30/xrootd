@@ -44,6 +44,8 @@
 #include <sys/time.h>
 #include <uuid/uuid.h>
 
+#include <iostream>
+
 namespace
 {
   //----------------------------------------------------------------------------
@@ -217,6 +219,9 @@ namespace
       {
         return pUserHandler;
       }
+
+virtual void *GetSemaphore() { return pUserHandler->GetSemaphore(); }
+virtual int GetSemaphoreValue() { return pUserHandler->GetSemaphoreValue(); }
 
     private:
       XrdCl::FileStateHandler  *pStateHandler;
@@ -717,6 +722,11 @@ namespace XrdCl
   {
     XrdSysMutexHelper scopedLock( pMutex );
 
+if (size == 0) {
+  std::cerr << "FileStateHandler::Write called with zero size, fixing size=8388608" << std::endl;
+  size = 8388608;
+}
+
     if( pFileState != Opened && pFileState != Recovering )
       return XRootDStatus( stError, errInvalidOp );
 
@@ -748,6 +758,10 @@ namespace XrdCl
     XRootDTransport::SetDescription( msg );
     StatefulHandler *stHandler = new StatefulHandler( this, handler, msg, params );
 
+std::cerr << "FileStateHandler::Write has queued a write at offset=" << offset
+	  << ", length=" << size
+          << " with stateful handler " << (void*) stHandler
+          << std::endl;
     return SendOrQueue( *pDataServer, msg, stHandler, params );
   }
 

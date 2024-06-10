@@ -728,6 +728,8 @@ namespace
         pChunks.pop();
         lck.unlock();
 
+std::cerr << "GetChunkImpl calls Wait on semaphore " << (void*)ch->sem
+	  << " with current value " << ch->sem->GetValue() << std::endl;
         ch->sem->Wait();
 
         if( !ch->status.IsOK() )
@@ -770,6 +772,8 @@ namespace
               delete response;
             }
             sem->Post();
+std::cerr << "Source::ChunkHandler::HandleResponse exits with semaphore " << (void*)sem
+          << " with value " << sem->GetValue() << std::endl;
           }
 
         XrdCl::Semaphore    *sem;
@@ -1435,6 +1439,8 @@ namespace
         //----------------------------------------------------------------------
         // If there is still place for this chunk to be sent send it
         //----------------------------------------------------------------------
+std::cerr << "PutChunk entry with pChunks.size()=" << pChunks.size()
+	  << ", pParallel=" << pParallel << std::endl;
         if( pChunks.size() < pParallel )
           return QueueChunk( ci );
 
@@ -1443,8 +1449,12 @@ namespace
         // one
         //----------------------------------------------------------------------
         XRDCL_SMART_PTR_T<ChunkHandler> ch( pChunks.front() );
+std::cerr << "... time to pop" << std::endl;
         pChunks.pop();
+std::cerr << "... time to wait on semaphore " << (void*)ch->sem 
+	  << " with value " << ch->sem->GetValue() << std::endl;
         ch->sem->Wait();
+std::cerr << "... back from wait" << std::endl;
         delete [] (char*)ch->chunk.buffer;
         if( !ch->status.IsOK() )
         {
@@ -1497,12 +1507,18 @@ namespace
         st = pFile->Write( ci.offset, ci.length, ci.buffer, ch );
         if( !st.IsOK() )
         {
+std::cerr << "QueueChunk write failed, doing cleanup!" << std::endl;
           CleanUpChunks();
           delete [] (char*)ci.buffer;
           ci.buffer = 0;
           delete ch;
           return st;
         }
+std::cerr << "QueueChunk added a new write request, semaphore="
+	  << (void*)ch->sem << " with value=" << ch->sem->GetValue()
+	  << " for buffer at offset=" << ci.offset << " and length=" << ci.length
+          << " using ChunkHandler " << (void*)ch 
+	  << std::endl;
         pChunks.push( ch );
         return XrdCl::XRootDStatus();
       }
@@ -1569,8 +1585,16 @@ namespace
             this->status = *statusval;
             delete statusval;
             sem->Post();
+std::cerr << "Dest::ChunkHandler::HandleResponse exits with semaphore " << (void*)sem
+          << " with value " << sem->GetValue() << std::endl;
           }
 
+void *GetSemaphore() {
+std::cerr << "GetSemaphore derived method is called" << std::endl;
+return (void*)sem; }
+virtual int GetSemaphoreValue() {
+std::cerr << "GetSemaphoreValue derived method is called" << std::endl;
+ return sem->GetValue(); }
           XrdCl::Semaphore       *sem;
           XrdCl::ChunkInfo        chunk;
           XrdCl::XRootDStatus     status;
