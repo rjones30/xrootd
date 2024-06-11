@@ -54,6 +54,7 @@ typedef struct dh_st {
     BIGNUM *priv_key;   /* private DH value */
     // ... other members ...
 };
+#define HAVE_DH_PADDED_FUNC 1
 
 // ---------------------------------------------------------------------------//
 //
