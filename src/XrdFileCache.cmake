@@ -35,6 +35,7 @@ target_link_libraries(
   XrdCl
   XrdUtils
   XrdServer
+  ${EXTRA_LIBS}
   pthread )
 
 set_target_properties(
@@ -74,7 +75,8 @@ target_link_libraries(
   xrdpfc_print
   XrdServer
   XrdCl
-  XrdUtils )
+  XrdUtils
+  ${EXTRA_LIBS} )
 
 #-------------------------------------------------------------------------------
 # Install

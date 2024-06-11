@@ -59,7 +59,8 @@ target_link_libraries(
   ${LIB_XRD_BWM}
   XrdServer
   XrdUtils
-  pthread )
+  pthread
+  ${EXTRA_LIBS} )
 
 set_target_properties(
   ${LIB_XRD_BWM}
@@ -140,7 +141,8 @@ add_library(
 target_link_libraries(
   ${LIB_XRD_THROTTLE}
   XrdServer
-  XrdUtils )
+  XrdUtils
+  ${EXTRA_LIBS} )
 
 set_target_properties(
   ${LIB_XRD_THROTTLE}
@@ -159,7 +161,8 @@ add_library(
 target_link_libraries(
   ${LIB_XRD_CMSREDIRL}
   XrdServer
-  XrdUtils )
+  XrdUtils
+  ${EXTRA_LIBS} )
 
 set_target_properties(
   ${LIB_XRD_CMSREDIRL}

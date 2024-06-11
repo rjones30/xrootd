@@ -75,13 +75,13 @@ if( NOT XRDCL_ONLY )
   #-----------------------------------------------------------------------------
   add_executable(
     xrdacctest
-    XrdApps/XrdAccTest.cc
-    ${EXTRA_LIBS} )
+    XrdApps/XrdAccTest.cc)
 
   target_link_libraries(
     xrdacctest
     XrdServer
-    XrdUtils )
+    XrdUtils
+    ${EXTRA_LIBS} )
 
   #-------------------------------------------------------------------------------
   # xrdmapc

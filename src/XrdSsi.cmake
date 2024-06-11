@@ -141,7 +141,8 @@ target_link_libraries(
   ${LIB_XRD_SSI}
   XrdSsiLib
   XrdUtils
-  XrdServer )
+  XrdServer
+  ${EXTRA_LIBS} )
 
 set_target_properties(
   ${LIB_XRD_SSI}
@@ -162,7 +163,8 @@ target_link_libraries(
   ${LIB_XRD_SSILOG}
   XrdSsiLib
   XrdUtils
-  XrdServer )
+  XrdServer
+  ${EXTRA_LIBS} )
 
 set_target_properties(
   ${LIB_XRD_SSILOG}

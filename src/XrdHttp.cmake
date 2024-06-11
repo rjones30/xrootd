@@ -56,6 +56,7 @@ if( BUILD_HTTP )
     XrdCrypto
     ${CMAKE_DL_LIBS}
     pthread
+    ${EXTRA_LIBS}
     ${OPENSSL_LIBRARIES}
     ${OPENSSL_CRYPTO_LIBRARY} )
 

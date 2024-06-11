@@ -50,6 +50,7 @@ if( BUILD_TPC )
     XrdHttpUtils
     ${CMAKE_DL_LIBS}
     pthread
+    ${EXTRA_LIBS}
     ${CURL_LIBRARIES} )
 
   if( MacOSX )
