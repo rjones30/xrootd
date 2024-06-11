@@ -75,7 +75,8 @@ if( NOT XRDCL_ONLY )
   #-----------------------------------------------------------------------------
   add_executable(
     xrdacctest
-    XrdApps/XrdAccTest.cc )
+    XrdApps/XrdAccTest.cc
+    ${EXTRA_LIBS} )
 
   target_link_libraries(
     xrdacctest
