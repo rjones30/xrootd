@@ -137,6 +137,15 @@ static int DSA_set0_key(DSA *d, BIGNUM *pub_key, BIGNUM *priv_key)
 #if defined(HAVE_DH_PADDED_FUNC)
 int DH_compute_key_padded(unsigned char *, const BIGNUM *, DH *);
 #else
+// opaque struct hidden from user view in openssl/dh.h (simplified)
+struct dh_st {
+    // Private data members representing Diffie-Hellman parameters and keys
+    BIGNUM *p;     // Prime modulus
+    BIGNUM *g;     // Generator
+    BIGNUM *pub_key;  // Public key
+    BIGNUM *priv_key; // Private key
+    // Other internal members...
+};
 static int DH_compute_key_padded(unsigned char *key, const BIGNUM *pub_key, DH *dh)
 {
     int rv, pad;
