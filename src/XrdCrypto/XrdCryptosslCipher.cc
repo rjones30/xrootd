@@ -42,6 +42,19 @@
 #include <openssl/pem.h>
 #include <openssl/dh.h>
 
+// The DH struct is supposed to be private to openssl, but the xrootd
+// developers thought it was theirs to play with, naughty children.
+
+typedef struct dh_st {
+    BIGNUM *p;    /* prime number (shared) */
+    BIGNUM *g;    /* generator of Z_p (shared) */
+    BIGNUM *q;    /* optional value (shared) */
+    BIGNUM *j;    /* optional value (shared) */
+    BIGNUM *pub_key;    /* public DH value */
+    BIGNUM *priv_key;   /* private DH value */
+    // ... other members ...
+};
+
 // ---------------------------------------------------------------------------//
 //
 // Cipher interface
