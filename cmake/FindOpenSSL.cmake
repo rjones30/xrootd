@@ -94,3 +94,5 @@ if( HAVE_DH_PADDED_FUNC)
      add_definitions( -DHAVE_DH_PADDED_FUNC )
    endif()
 endif()
+
+unset ( CMAKE_REQUIRED_LIBRARIES )
