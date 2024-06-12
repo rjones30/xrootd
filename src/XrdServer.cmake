@@ -305,6 +305,7 @@ add_library(
 
 target_link_libraries(
   XrdServer
+  PUBLIC
   XrdUtils
   ${CMAKE_DL_LIBS}
   pthread
