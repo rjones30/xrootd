@@ -42,14 +42,19 @@ if(EXISTS UUID_INCLUDE_DIR)
 endif()
 
 if(NOT UUID_LIBRARY)
-  find_path(UUID_LIBRARY NAMES libuuid_static.a libuuid_static.lib
-            HINTS ${CMAKE_INSTALL_PREFIX}/lib ${CMAKE_INSTALL_PREFIX}/lib64)
+  message("Looking for a static UUID_LIBRARY in ${CMAKE_INSTALL_PREFIX}/lib[64]")
+  find_library(UUID_LIBRARY uuid_static
+               HINTS ${CMAKE_INSTALL_PREFIX}/lib ${CMAKE_INSTALL_PREFIX}/lib64)
   if(NOT UUID_LIBRARY)
-    find_path(UUID_LIBRARY NAMES libuuid.a libuuid.so libuuid.lib
-              HINTS ${CMAKE_INSTALL_PREFIX}/lib ${CMAKE_INSTALL_PREFIX}/lib64)
+    message("Looking for any UUID_LIBRARY in ${CMAKE_INSTALL_PREFIX}/lib[64]")
+    find_library(UUID_LIBRARY uuid
+                 HINTS ${CMAKE_INSTALL_PREFIX}/lib ${CMAKE_INSTALL_PREFIX}/lib64)
   endif()
   if(UUID_LIBRARY)
+    message("Found UUID_LIBRARY at ${UUID_LIBRARY}")
     set(UUID_LIBRARIES ${UUID_LIBRARY} CACHE STRING "alias for UUID_LIBRARY")
+  else()
+    message("UUID_LIBRARY not found, maybe you need to provide it to cmake via option -DUUID_LIBRARY")
   endif()
 endif()
 
