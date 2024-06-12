@@ -4,17 +4,17 @@
 
 include( CheckCXXSourceRuns )
 
-set( Linux    FALSE )
-set( MacOSX   FALSE )
-set( Solaris  FALSE )
+set( Linux    FALSE CACHE BOOL "no default target platform")
+set( MacOSX   FALSE CACHE BOOL "no default target platform")
+set( Solaris  FALSE CACHE BOOL "no default target platform")
 
-set( XrdClPipelines FALSE )
+set( XrdClPipelines FALSE CACHE BOOL "disable use of xrootd client pipelines")
 
 add_definitions( -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 )
-set( LIBRARY_PATH_PREFIX "lib" )
+set( LIBRARY_PATH_PREFIX "lib" CACHE STRING "Library path prefix")
 
 if( NOT DEFINED USE_LIBC_SEMAPHORE )
-    set(USE_LIBC_SEMAPHORE 1)
+  set(USE_LIBC_SEMAPHORE 1 CACHE BOOL "use semaphores provided by libc")
 endif()
 add_definitions( -DUSE_LIBC_SEMAPHORE=${USE_LIBC_SEMAPHORE} )
 
@@ -53,7 +53,7 @@ if( CMAKE_COMPILER_IS_GNUCXX )
   endif()
   
   if( GCC_VERSION VERSION_GREATER 4.8.0 )
-  	set( XrdClPipelines TRUE )
+    set( XrdClPipelines TRUE CACHE BOOL "use xrootd client pipelines")
   endif()
 
   # gcc 6.0 is more pedantic
@@ -77,17 +77,17 @@ endif()
 # Linux
 #-------------------------------------------------------------------------------
 if( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
-  set( Linux TRUE )
+  set( Linux TRUE CACHE BOOL "target platform is Linux")
   include( GNUInstallDirs )
   add_definitions( -D__linux__=1 )
-  set( EXTRA_LIBS rt )
+  set( EXTRA_LIBS rt CACHE STRING "Extra platform-specific libraries for linker")
 endif()
 
 #-------------------------------------------------------------------------------
 # MacOSX
 #-------------------------------------------------------------------------------
 if( APPLE )
-  set( MacOSX TRUE )
+  set( MacOSX TRUE CACHE BOOL "target platform is MacOS")
   
   if( NOT DEFINED CMAKE_MACOSX_RPATH )
     set( CMAKE_MACOSX_RPATH 1 )
@@ -126,10 +126,10 @@ if( ${CMAKE_SYSTEM_NAME} STREQUAL "SunOS" )
   set( CMAKE_INSTALL_MANDIR "man" )
   set( CMAKE_INSTALL_INCLUDEDIR "include" )
   set( CMAKE_INSTALL_DATADIR "share" )
-  set( Solaris TRUE )
+  set( Solaris TRUE CACHE BOOL "target platform is Solaris")
   add_definitions( -D__solaris__=1 )
   add_definitions( -DSUNCC -D_REENTRANT -D_POSIX_PTHREAD_SEMANTICS )
-  set( EXTRA_LIBS rt  Crun Cstd )
+  set( EXTRA_LIBS rt Crun Cstd CACHE STRING "Extra platform-specific libraries for linker")
 
   set( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fast" )
   set( CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -fast" )
@@ -154,8 +154,8 @@ if( ${CMAKE_SYSTEM_NAME} STREQUAL "SunOS" )
     set( CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -G" )
     set( CMAKE_LIBRARY_PATH "/lib/64;/usr/lib/64" )
     add_definitions( -DSUNX86 )
-    set( LIB_SEARCH_OPTIONS NO_DEFAULT_PATH )
-    set( LIBRARY_PATH_PREFIX "lib/64" )
+    set( LIB_SEARCH_OPTIONS NO_DEFAULT_PATH CACHE STRING "library search options")
+    set( LIBRARY_PATH_PREFIX "lib/64" CACHE STRING "Library path prefix")
   endif()
 
   #-----------------------------------------------------------------------------
