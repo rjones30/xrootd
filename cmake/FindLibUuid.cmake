@@ -42,15 +42,13 @@ if(EXISTS UUID_INCLUDE_DIR)
 endif()
 
 if(NOT UUID_LIBRARY)
-  find_path(UUID_LIBRARY_STATIC_PATH NAMES libuuid_static.a libuuid_static.lib
+  find_path(UUID_LIBRARY NAMES libuuid_static.a libuuid_static.lib
             HINTS ${CMAKE_INSTALL_PREFIX}/lib ${CMAKE_INSTALL_PREFIX}/lib64)
-  find_path(UUID_LIBRARY_PATH NAMES libuuid.a libuuid.so libuuid.lib
-            HINTS ${CMAKE_INSTALL_PREFIX}/lib ${CMAKE_INSTALL_PREFIX}/lib64)
-  if(UUID_LIBRARY_STATIC_PATH)
-    set(UUID_LIBRARY "uuid_static" CACHE STRING "name of static uuid library")
-    set(UUID_LIBRARIES ${UUID_LIBRARY} CACHE STRING "alias for UUID_LIBRARY")
-  elseif(UUID_LIBRARY_PATH)
-    set(UUID_LIBRARY "uuid" CACHE STRING "name of uuid library")
+  if(NOT UUID_LIBRARY)
+    find_path(UUID_LIBRARY NAMES libuuid.a libuuid.so libuuid.lib
+              HINTS ${CMAKE_INSTALL_PREFIX}/lib ${CMAKE_INSTALL_PREFIX}/lib64)
+  endif()
+  if(UUID_LIBRARY)
     set(UUID_LIBRARIES ${UUID_LIBRARY} CACHE STRING "alias for UUID_LIBRARY")
   endif()
 endif()
