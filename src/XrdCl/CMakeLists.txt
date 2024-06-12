@@ -158,19 +158,19 @@ target_link_libraries(
   XrdCl
   XrdXml
   XrdUtils
-  PUBLIC pthread
-  PUBLIC ${UUID_LIBRARY}
-  PUBLIC z
-  PUBLIC ${EXTRA_LIBS}
-  PUBLIC ${CMAKE_DL_LIBS})
+  pthread
+  ${UUID_LIBRARY}
+  z
+  ${EXTRA_LIBS}
+  ${CMAKE_DL_LIBS})
 
 set_target_properties(
   XrdCl
   PROPERTIES
-  INTERFACE_LINK_LIBRARIES ""
-  LINK_INTERFACE_LIBRARIES ""
   VERSION   ${XRD_CL_VERSION}
   SOVERSION ${XRD_CL_SOVERSION} )
+  #INTERFACE_LINK_LIBRARIES ""
+  #LINK_INTERFACE_LIBRARIES ""
 
 #-------------------------------------------------------------------------------
 # xrdfs
