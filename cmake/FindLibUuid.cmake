@@ -31,13 +31,28 @@ include(CheckLibraryExists)
 include(FindPackageHandleStandardArgs)
 
 if(NOT UUID_INCLUDE_DIR)
-  find_path(UUID_INCLUDE_DIR uuid/uuid.h)
+  find_path(UUID_INCLUDE_DIR uuid/uuid.h
+            HINTS ${CMAKE_INSTALL_PREFIX}/include)
 endif()
 
 if(EXISTS UUID_INCLUDE_DIR)
-  set(UUID_INCLUDE_DIRS ${UUID_INCLUDE_DIR})
+  set(UUID_INCLUDE_DIRS ${UUID_INCLUDE_DIR} CACHE STRING "alias for UUID_INCLUDE_DIR")
   set(CMAKE_REQUIRED_INCLUDES ${UUID_INCLUDE_DIRS})
   check_cxx_symbol_exists("uuid_generate_random" "uuid/uuid.h" _uuid_header_only)
+endif()
+
+if(NOT UUID_LIBRARY)
+  find_path(UUID_LIBRARY_STATIC_PATH NAMES libuuid_static.a libuuid_static.lib
+            HINTS ${CMAKE_INSTALL_PREFIX}/lib ${CMAKE_INSTALL_PREFIX}/lib64)
+  find_path(UUID_LIBRARY_PATH NAMES libuuid.a libuuid.so libuuid.lib
+            HINTS ${CMAKE_INSTALL_PREFIX}/lib ${CMAKE_INSTALL_PREFIX}/lib64)
+  if(UUID_LIBRARY_STATIC_PATH)
+    set(UUID_LIBRARY "uuid_static" CACHE STRING "name of static uuid library")
+    set(UUID_LIBRARIES ${UUID_LIBRARY} CACHE STRING "alias for UUID_LIBRARY")
+  elseif(UUID_LIBRARY_PATH)
+    set(UUID_LIBRARY "uuid" CACHE STRING "name of uuid library")
+    set(UUID_LIBRARIES ${UUID_LIBRARY} CACHE STRING "alias for UUID_LIBRARY")
+  endif()
 endif()
 
 if(NOT _uuid_header_only AND NOT UUID_LIBRARY)
