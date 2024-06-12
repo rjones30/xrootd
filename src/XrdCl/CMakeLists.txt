@@ -156,14 +156,13 @@ add_library(
 
 target_link_libraries(
   XrdCl
-  PUBLIC
   XrdXml
   XrdUtils
-  pthread
-  ${UUID_LIBRARY}
-  z
-  ${EXTRA_LIBS}
-  ${CMAKE_DL_LIBS})
+  PUBLIC pthread
+  PUBLIC ${UUID_LIBRARY}
+  PUBLIC z
+  PUBLIC ${EXTRA_LIBS}
+  PUBLIC ${CMAKE_DL_LIBS})
 
 set_target_properties(
   XrdCl
