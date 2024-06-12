@@ -17,7 +17,6 @@ target_link_libraries(
   XrdUtils
   ${CMAKE_DL_LIBS}
   pthread
-  ${EXTRA_LIBS}
   ${SOCKET_LIBRARY} )
 
 #-------------------------------------------------------------------------------
@@ -52,15 +51,13 @@ add_executable(
                                   XrdCms/XrdCmsSelect.hh
   XrdCms/XrdCmsState.cc           XrdCms/XrdCmsState.hh
   XrdCms/XrdCmsSupervisor.cc      XrdCms/XrdCmsSupervisor.hh
-                                  XrdCms/XrdCmsTrace.hh 
-  ${EXTRA_LIBS} )
+                                  XrdCms/XrdCmsTrace.hh )
 
 target_link_libraries(
   cmsd
   XrdServer
   XrdUtils
   pthread
-  ${EXTRA_LIBS}
   ${SOCKET_LIBRARY} )
 
 #-------------------------------------------------------------------------------

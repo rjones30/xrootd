@@ -308,8 +308,9 @@ target_link_libraries(
   XrdUtils
   ${CMAKE_DL_LIBS}
   pthread
-  ${EXTRA_LIBS}
   ${SOCKET_LIBRARY} )
+
+target_link_libraries(XrdServer PUBLIC ${EXTRA_LIBS})
 
 set_target_properties(
   XrdServer
@@ -330,8 +331,7 @@ add_library(
 target_link_libraries(
   ${LIB_XRD_PROTOCOL}
   XrdServer
-  XrdUtils
-  ${EXTRA_LIBS} )
+  XrdUtils )
 
 set_target_properties(
   ${LIB_XRD_PROTOCOL}
