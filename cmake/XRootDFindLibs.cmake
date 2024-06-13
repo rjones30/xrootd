@@ -39,7 +39,7 @@ if( ENABLE_CRYPTO )
     add_definitions( -DHAVE_SSL )
     set( BUILD_CRYPTO TRUE CACHE BOOL "build with crypto library")
   else()
-    set( BUILD_CRYPTO FALSE CACHE BOOL "build with crypto library"))
+    set( BUILD_CRYPTO FALSE CACHE BOOL "build with crypto library")
   endif()
 endif()
 
