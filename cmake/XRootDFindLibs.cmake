@@ -30,6 +30,14 @@ if( SYSTEMD_FOUND )
 endif()
 
 find_package( CURL )
+if("${CURL_LIBRARIES}" STREQUAL "")
+  find_library(CURL_LIBRARIES curl_static
+               HINTS "${CMAKE_BINARY_PREFIX}/lib" "${CMAKE_BINARY_PREFIX}/lib64")
+  if("${CURL_LIBRARIES}" STREQUAL "")
+    find_library(CURL_LIBRARIES curl
+                 HINTS "${CMAKE_BINARY_PREFIX}/lib" "${CMAKE_BINARY_PREFIX}/lib64")
+  endif()
+endif()
 message("find_package(CURL) returned CURL_LIBRARIES=${CURL_LIBRARIES}")
 
 if( ENABLE_CRYPTO )
