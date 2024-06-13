@@ -42,7 +42,7 @@ endif()
 if(APPLE)
   find_library(COREFOUNDATION_LIBRARY CoreFoundation)
   set(CURL_LIBRARIES ${COREFOUNDATION_LIBRARY} ${CURL_LIBRARIES})
-endif
+endif()
 
 message("find_package(CURL) returned CURL_LIBRARIES=${CURL_LIBRARIES}")
 
