@@ -13,6 +13,7 @@ if( BUILD_TPC )
   #-----------------------------------------------------------------------------
   # The XrdHttp library
   #-----------------------------------------------------------------------------
+  message("BUILD_TPC is true, CURL_INCLUDE_DIRS=${CURL_INCLUDE_DIRS}, CURL_LIBARIES=${CURL_LIBRARIES}")
   include_directories( ${CURL_INCLUDE_DIRS} )
 
   # On newer versions of libcurl, we can use pipelining of requests.
