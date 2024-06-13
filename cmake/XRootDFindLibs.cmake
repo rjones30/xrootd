@@ -38,6 +38,12 @@ if("${CURL_LIBRARIES}" STREQUAL "")
                  HINTS "${CMAKE_INSTALL_PREFIX}/lib" "${CMAKE_INSTALL_PREFIX}/lib64")
   endif()
 endif()
+
+if(APPLE)
+  find_library(COREFOUNDATION_LIBRARY CoreFoundation)
+  set(CURL_LIBRARIES ${COREFOUNDATION_LIBRARY} ${CURL_LIBRARIES})
+endif
+
 message("find_package(CURL) returned CURL_LIBRARIES=${CURL_LIBRARIES}")
 
 if( ENABLE_CRYPTO )
