@@ -40,8 +40,14 @@ if("${CURL_LIBRARIES}" STREQUAL "")
 endif()
 
 if(APPLE)
-  find_library(COREFOUNDATION_LIBRARY CoreFoundation)
-  set(CURL_LIBRARIES ${COREFOUNDATION_LIBRARY} ${CURL_LIBRARIES})
+  find_library(COREFOUNDATION_FRAMEWORK CoreFoundation)
+  find_library(SYSTEMCONFIGURATION_FRAMEWORK SystemConfiguration)
+  find_library(SECURITY_FRAMEWORK Security)
+  set(CURL_LIBRARIES ${COREFOUNDATION_FRAMEWORK}
+	             ${SYSTEMCONFIGURATION_FRAMEWORK}
+		     ${SECURITY_FRAMEWORK}
+		     ${CURL_LIBRARIES}
+	             ssh2 z)
 endif()
 
 message("CURL_LIBRARIES=${CURL_LIBRARIES}")
