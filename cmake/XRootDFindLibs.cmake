@@ -39,9 +39,11 @@ if("${CURL_LIBRARIES}" STREQUAL "")
   endif()
 endif()
 
+message("cmake variable APPLE is ${APPLE}")
+message("cmake variable CMAKE_SYSTEM_NAME is ${CMAKE_SYSTEM_NAME}")
 if(APPLE)
   find_library(COREFOUNDATION_LIBRARY CoreFoundation)
-  set(CURL_LIBRARIES ${COREFOUNDATION_LIBRARY} ${CURL_LIBRARIES}
+  set(CURL_LIBRARIES "${COREFOUNDATION_LIBRARY} ${CURL_LIBRARIES}"
                      CACHE STRING "libraries needed in order to link with curl lib")
 endif()
 
