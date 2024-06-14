@@ -4,17 +4,17 @@
 
 include( CheckCXXSourceRuns )
 
-set( Linux    FALSE CACHE BOOL "no default target platform")
-set( MacOSX   FALSE CACHE BOOL "no default target platform")
-set( Solaris  FALSE CACHE BOOL "no default target platform")
+set( Linux    FALSE )
+set( MacOSX   FALSE )
+set( Solaris  FALSE )
 
-set( XrdClPipelines FALSE CACHE BOOL "disable use of xrootd client pipelines")
+set( XrdClPipelines FALSE )
 
 add_definitions( -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 )
-set( LIBRARY_PATH_PREFIX "lib" CACHE STRING "Library path prefix")
+set( LIBRARY_PATH_PREFIX "lib" )
 
 if( NOT DEFINED USE_LIBC_SEMAPHORE )
-  set(USE_LIBC_SEMAPHORE 1 CACHE BOOL "use semaphores provided by libc")
+  set(USE_LIBC_SEMAPHORE 1)
 endif()
 add_definitions( -DUSE_LIBC_SEMAPHORE=${USE_LIBC_SEMAPHORE} )
 
