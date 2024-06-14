@@ -46,16 +46,23 @@ if(APPLE)
   find_library(SSH2_LIBRARY ssh2)
   find_library(ZLIB_LIBRARY z)
   set(CURL_LIBRARIES ${COREFOUNDATION_FRAMEWORK}
-	             ${SYSTEMCONFIGURATION_FRAMEWORK}
-		     ${SECURITY_FRAMEWORK}
-		     ${CURL_LIBRARIES}
-		     ${SSH2_LIBRARY}
-		     ${ZLIB_LIBRARY})
-  find_path(USR_INCLUDEDIR stdio.h)
+                     ${SYSTEMCONFIGURATION_FRAMEWORK}
+                     ${SECURITY_FRAMEWORK}
+                     ${CURL_LIBRARIES}
+                     ${SSH2_LIBRARY}
+                     ${ZLIB_LIBRARY})
+  execute_process(COMMAND xcode-select --install
+                  OUTPUT XCODE_INSTALL)
+  execute_process(COMMAND xcrun --show-sdk-path
+                  OUTPUT XCODE_SDK_PATH)
+  find_path(STDIO_INCLUDEDIR stdio.h)
+  find_path(STRING_INCLUDEDIR string)
 endif()
 
 message("CURL_LIBRARIES=${CURL_LIBRARIES}")
 message("USR_INCLUDEDIR is ${USR_INCLUDEDIR}")
+message("XCODE_INSTALL is ${XCODE_INSTALL}")
+message("XCODE_SDK_PATH is ${XCODE_SDK_PATH}")
 
 if( ENABLE_CRYPTO )
   find_package( OpenSSL )
