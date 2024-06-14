@@ -41,7 +41,8 @@ endif()
 
 if(APPLE)
   find_library(COREFOUNDATION_LIBRARY CoreFoundation)
-  set(CURL_LIBRARIES ${COREFOUNDATION_LIBRARY} ${CURL_LIBRARIES})
+  set(CURL_LIBRARIES ${COREFOUNDATION_LIBRARY} ${CURL_LIBRARIES}
+                     CACHE STRING "libraries needed in order to link with curl lib")
 endif()
 
 message("find_package(CURL) returned CURL_LIBRARIES=${CURL_LIBRARIES}")
