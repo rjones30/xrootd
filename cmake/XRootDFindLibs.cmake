@@ -51,19 +51,13 @@ if(APPLE)
 		     ${CURL_LIBRARIES}
 		     ${SSH2_LIBRARY}
 		     ${ZLIB_LIBRARY})
-
-  execute_process(COMMAND xcode-select --print-path
-                  OUTPUT_VARIABLE XCODE_PATH
-		  ERROR_VARIABLE XCODE_PATH_ERROR
-                  ECHO_OUTPUT_VARIABLE
-		  ECHO_ERROR_VARIABLE)
-  message("XCODE_PATH is now ${XCODE_PATH}")
-  find_path(STDIO_H_PATH stdio.h
-            HINTS "${XCODE_PATH}/usr/include")
-  message("STDIO_H_PATH is ${STDIO_H_PATH}")
+  find_path(USR_INCLUDE_PATH stdio.h)
+  set(ENV{XRD_INCDIR} ${USR_INCLUDE_PATH})
 endif()
 
 message("CURL_LIBRARIES=${CURL_LIBRARIES}")
+message("USR_INCLUDE_PATH is ${USR_INCLUDE_PATH}")
+message("environment variable XRD_INCDIR is $ENV{XRD_INCDIR}")
 
 if( ENABLE_CRYPTO )
   find_package( OpenSSL )
