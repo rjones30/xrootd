@@ -51,11 +51,11 @@ if(APPLE)
 		     ${CURL_LIBRARIES}
 		     ${SSH2_LIBRARY}
 		     ${ZLIB_LIBRARY})
-  find_path(XRD_SRCINCDIR stdio.h)
+  find_path(USR_INCLUDEDIR stdio.h)
 endif()
 
 message("CURL_LIBRARIES=${CURL_LIBRARIES}")
-message("XRD_SRCINCDIR is ${XRD_SRCINCDIR}")
+message("USR_INCLUDEDIR is ${USR_INCLUDEDIR}")
 
 if( ENABLE_CRYPTO )
   find_package( OpenSSL )
