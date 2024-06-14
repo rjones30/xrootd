@@ -52,15 +52,16 @@ if(APPLE)
                      ${SSH2_LIBRARY}
                      ${ZLIB_LIBRARY})
   execute_process(COMMAND xcode-select --install
-                  OUTPUT XCODE_INSTALL)
+                  OUTPUT_VARIABLE XCODE_INSTALL)
   execute_process(COMMAND xcrun --show-sdk-path
-                  OUTPUT XCODE_SDK_PATH)
+                  OUTPUT_VARIABLE XCODE_SDK_PATH)
   find_path(STDIO_INCLUDEDIR stdio.h)
   find_path(STRING_INCLUDEDIR string)
 endif()
 
 message("CURL_LIBRARIES=${CURL_LIBRARIES}")
-message("USR_INCLUDEDIR is ${USR_INCLUDEDIR}")
+message("STDIO_INCLUDEDIR is ${STDIO_INCLUDEDIR}")
+message("STRING_INCLUDEDIR is ${STRING_INCLUDEDIR}")
 message("XCODE_INSTALL is ${XCODE_INSTALL}")
 message("XCODE_SDK_PATH is ${XCODE_SDK_PATH}")
 
