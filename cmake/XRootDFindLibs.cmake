@@ -43,11 +43,14 @@ if(APPLE)
   find_library(COREFOUNDATION_FRAMEWORK CoreFoundation)
   find_library(SYSTEMCONFIGURATION_FRAMEWORK SystemConfiguration)
   find_library(SECURITY_FRAMEWORK Security)
+  find_library(SSH2_LIBRARY ssh2)
+  find_library(ZLIB_LIBRARY z)
   set(CURL_LIBRARIES ${COREFOUNDATION_FRAMEWORK}
 	             ${SYSTEMCONFIGURATION_FRAMEWORK}
 		     ${SECURITY_FRAMEWORK}
 		     ${CURL_LIBRARIES}
-	             ssh2 z)
+		     ${SSH2_LIBRARY}
+		     ${ZLIB_LIBRARY})
 endif()
 
 message("CURL_LIBRARIES=${CURL_LIBRARIES}")
