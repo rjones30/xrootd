@@ -53,8 +53,10 @@ if(APPLE)
 		     ${ZLIB_LIBRARY})
 
   execute_process(COMMAND xcode-select --print-path
-                  ECHO_OUTPUT_VARIABLE XCODE_PATH
-		  ECHO_ERROR_VARIABLE XCODE_PATH_ERROR)
+                  OUTPUT_VARIABLE XCODE_PATH
+		  ERROR_VARIABLE XCODE_PATH_ERROR
+                  ECHO_OUTPUT_VARIABLE
+		  ECHO_ERROR_VARIABLE)
   message("XCODE_PATH is now ${XCODE_PATH}")
   find_path(STDIO_H_PATH stdio.h
             HINTS "${XCODE_PATH}/usr/include")
