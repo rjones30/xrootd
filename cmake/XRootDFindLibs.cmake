@@ -56,9 +56,10 @@ if(APPLE)
   execute_process(COMMAND xcrun --show-sdk-path
                   OUTPUT_VARIABLE XCODE_SDK_PATH)
   find_path(STDIO_INCLUDEDIR stdio.h
-            HINTS ${XCODE_SDK_PATH} ${XCODE_INSTALL_PATH})
+            HINTS "${XCODE_SDK_PATH}/usr/include")
   find_path(STRING_INCLUDEDIR string
-            HINTS ${XCODE_SDK_PATH} ${XCODE_INSTALL_PATH})
+            HINTS "${XCODE_SDK_PATH}/usr/include")
+  set(USR_INCLUDEDIR "${STDIO_INCLUDEDIR} ${STRING_INCLUDEDIR}")
 endif()
 
 message("CURL_LIBRARIES=${CURL_LIBRARIES}")
@@ -66,6 +67,7 @@ message("STDIO_INCLUDEDIR is ${STDIO_INCLUDEDIR}")
 message("STRING_INCLUDEDIR is ${STRING_INCLUDEDIR}")
 message("XCODE_INSTALL_PATH is ${XCODE_INSTALL_PATH}")
 message("XCODE_SDK_PATH is ${XCODE_SDK_PATH}")
+message("USR_INCLUDE_DIR is ${USR_INCLUDEDIR}")
 
 if( ENABLE_CRYPTO )
   find_package( OpenSSL )
