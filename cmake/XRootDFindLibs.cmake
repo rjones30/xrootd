@@ -51,14 +51,18 @@ if(APPLE)
                      ${CURL_LIBRARIES}
                      ${SSH2_LIBRARY}
                      ${ZLIB_LIBRARY})
-  execute_process(COMMAND xcode-select --install
+  execute_process(COMMAND xcode-select --print-path
                   OUTPUT_VARIABLE XCODE_INSTALL_PATH)
   execute_process(COMMAND xcrun --show-sdk-path
                   OUTPUT_VARIABLE XCODE_SDK_PATH)
   find_path(STDIO_INCLUDEDIR stdio.h
-            HINTS "${XCODE_SDK_PATH}/usr/include")
+            HINTS "/Library/Developer/CommandlineTools/SDKs/MacOSX.sdk/usr/include"
+	          "${XCODE_INSTALL_PATH}/usr/include"
+	          "${XCODE_SDK_PATH}/usr/include")
   find_path(STRING_INCLUDEDIR string
-            HINTS "${XCODE_SDK_PATH}/usr/include")
+            HINTS "/Library/Developer/CommandlineTools/SDKs/MacOSX.sdk/usr/include"
+	          "${XCODE_INSTALL_PATH}/usr/include"
+	          "${XCODE_SDK_PATH}/usr/include")
   set(USR_INCLUDEDIR "${STDIO_INCLUDEDIR} ${STRING_INCLUDEDIR}")
 endif()
 
