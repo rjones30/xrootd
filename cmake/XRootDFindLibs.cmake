@@ -52,17 +52,19 @@ if(APPLE)
                      ${SSH2_LIBRARY}
                      ${ZLIB_LIBRARY})
   execute_process(COMMAND xcode-select --install
-                  OUTPUT_VARIABLE XCODE_INSTALL)
+                  OUTPUT_VARIABLE XCODE_INSTALL_PATH)
   execute_process(COMMAND xcrun --show-sdk-path
                   OUTPUT_VARIABLE XCODE_SDK_PATH)
-  find_path(STDIO_INCLUDEDIR stdio.h)
-  find_path(STRING_INCLUDEDIR string)
+  find_path(STDIO_INCLUDEDIR stdio.h
+            HINTS ${XCODE_SDK_PATH} ${XCODE_INSTALL_PATH})
+  find_path(STRING_INCLUDEDIR string
+            HINTS ${XCODE_SDK_PATH} ${XCODE_INSTALL_PATH})
 endif()
 
 message("CURL_LIBRARIES=${CURL_LIBRARIES}")
 message("STDIO_INCLUDEDIR is ${STDIO_INCLUDEDIR}")
 message("STRING_INCLUDEDIR is ${STRING_INCLUDEDIR}")
-message("XCODE_INSTALL is ${XCODE_INSTALL}")
+message("XCODE_INSTALL_PATH is ${XCODE_INSTALL_PATH}")
 message("XCODE_SDK_PATH is ${XCODE_SDK_PATH}")
 
 if( ENABLE_CRYPTO )
