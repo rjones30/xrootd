@@ -28,9 +28,7 @@ add_custom_command(OUTPUT ${OUTPUT}
                    COMMAND ${PYTHON_EXECUTABLE} ${SETUP_PY} build
                    DEPENDS ${DEPS})
 
-message("Here I am in bindings/python building the custom target with XRD_SRCINCDIR=${XRD_SRCINCDIR}")
 add_custom_target(python_target ALL DEPENDS ${OUTPUT} XrdCl)
-message("I find that USR_INCLUDEDIR=${USR_INCLUDEDIR}")
 
 # Get the distribution name on Debian families
 execute_process( COMMAND grep -i ^NAME=\" /etc/os-release

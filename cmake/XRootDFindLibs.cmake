@@ -56,14 +56,8 @@ if(APPLE)
   execute_process(COMMAND xcrun --show-sdk-path
                   OUTPUT_VARIABLE XCODE_SDK_PATH)
   find_path(STDIO_INCLUDEDIR stdio.h
-            HINTS "/Library/Developer/CommandlineTools/SDKs/MacOSX.sdk/usr/include"
-	          "${XCODE_INSTALL_PATH}/usr/include"
-	          "${XCODE_SDK_PATH}/usr/include")
-  find_path(STRING_INCLUDEDIR string
-            HINTS "/Library/Developer/CommandlineTools/SDKs/MacOSX.sdk/usr/include"
-	          "${XCODE_INSTALL_PATH}/usr/include"
-	          "${XCODE_SDK_PATH}/usr/include")
-  set(USR_INCLUDEDIR "${STDIO_INCLUDEDIR} ${STRING_INCLUDEDIR}")
+            HINTS "${XCODE_SDK_PATH}/usr/include")
+  set(USR_INCLUDEDIR "${STDIO_INCLUDEDIR}")
 endif()
 
 message("CURL_LIBRARIES=${CURL_LIBRARIES}")
