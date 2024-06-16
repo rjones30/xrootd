@@ -43,7 +43,8 @@ if(APPLE)
   find_library(COREFOUNDATION_FRAMEWORK CoreFoundation)
   find_library(SYSTEMCONFIGURATION_FRAMEWORK SystemConfiguration)
   find_library(SECURITY_FRAMEWORK Security)
-  find_library(SSH2_LIBRARY ssh2)
+  find_library(SSH2_LIBRARY NAMES ssh2 libssh2
+               HINTS /usr/local/lib /opt/homebrew/lib /usr/local/opt/libssh2/lib)
   find_library(ZLIB_LIBRARY z)
   set(CURL_LIBRARIES ${COREFOUNDATION_FRAMEWORK}
                      ${SYSTEMCONFIGURATION_FRAMEWORK}
