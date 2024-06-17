@@ -52,7 +52,7 @@
 #define UNIX_PFX
 //#endif
 
-#ifdef __MUSL__
+#if defined(__linux__) && !defined(__GLIBC__)
 #define statfs64 statfs
 #define statvfs64 statvfs
 #endif

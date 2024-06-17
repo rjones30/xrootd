@@ -38,7 +38,7 @@
 #include <unistd.h>
 #include <sys/uio.h>
 
-#ifdef __MUSL__
+#if defined(__linux__) && !defined(__GLIBC__)
 #define F_PERM 1
 #define F_NORD 4
 #define F_NOWR 8
@@ -323,7 +323,7 @@ size_t XrdPosix_Fread(void *ptr, size_t size, size_t nitems, FILE *stream)
 #if defined(__linux__) && defined(__GLIBC__)
    else if (bytes < 0) stream->_flags |= _IO_ERR_SEEN;
    else                stream->_flags |= _IO_EOF_SEEN;
-#elif defined(__MUSL__)
+#elif defined(__linux__)
    else if (bytes < 0) {
       int flags = fcntl(fd, F_GETFL);
       flags |= F_ERR;
