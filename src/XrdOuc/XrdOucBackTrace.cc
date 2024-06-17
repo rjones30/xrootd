@@ -34,7 +34,7 @@
 #include <vector>
 #include <sys/syscall.h>
 
-#ifdef __GNUC__
+#if defined(__GNUC__) && defined(__GLIBC__)
 #include <execinfo.h>
 #include <cxxabi.h>
 #endif
@@ -177,7 +177,7 @@ namespace
 {
 int Demangle(char *cSym, char *buff, int blen)
 {
-#ifndef __GNUC__
+#if !defined(__GNUC__) || !defined(__GLIBC__)
    return -1;
 #else
    int   status;
@@ -227,7 +227,7 @@ namespace
 {
 void DumpStack(char *bP, int bL, TidType tid)
 {
-#ifndef __GNUC__
+#if !defined(__GNUC__) || !defined(__GLIBC__)
    snprintf(bP, bL, "TBT " TidFmt " No stack information available, not gnuc.", tid);
    return;
 #else

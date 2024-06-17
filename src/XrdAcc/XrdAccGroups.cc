@@ -395,8 +395,12 @@ int XrdAccCheckNetGroup(const char *netgroup, char *key, void *Arg)
 
     // Check if this netgroup, user, host, domain combination exists.
     //
+#ifdef __GLIBC__
     if (innetgr(netgroup, (const char *)grp->host, (const char *)grp->user,
                 XrdAccGroupMaster.Domain()))
+#else
+    if (0 == 1)
+#endif
        {if (grp->gtabi >= NGROUPS_MAX) 
            {if (grp->gtabi == NGROUPS_MAX)
                cerr <<"XrdAccGroups: More than " <<grp->gtabi <<"netgroups for " <<grp->user <<endl;

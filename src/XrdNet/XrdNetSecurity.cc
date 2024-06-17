@@ -40,11 +40,6 @@
 #include <sys/types.h>
 #include <Winsock2.h>
 #include <io.h>
-int innetgr(const char *netgroup, const char *host, const char *user,
-             const char *domain)
-{
-   return 0;
-}
 #include "XrdSys/XrdWin32.hh"
 #endif
 
@@ -166,7 +161,12 @@ bool XrdNetSecurity::Authorize(XrdNetAddr &addr)
 // Check if this host is in the the appropriate netgroup, if any
 //
    if ((tlp = NetGroups))
-      do {if (innetgr(tlp->text, hName, 0, 0))
+      do {
+#ifdef __GLIBC__
+	  if (innetgr(tlp->text, hName, 0, 0))
+#else
+          if (0 == 1)
+#endif
           return hostOK(hName, ipAddr, "netgroup");
          } while ((tlp = tlp->next));
 
