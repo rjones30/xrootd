@@ -498,8 +498,14 @@ size_t XrdPosix_Fwrite(const void *ptr, size_t size, size_t nitems, FILE *stream
 //
    if (bytes > 0 && size) rc = bytes/size;
 #ifndef SUNX86
-#if defined(__linux__)
+#if defined(__linux__) && defined(__GLIBC__)
       else stream->_flags |= _IO_ERR_SEEN;
+#elif defined(__linux__)
+   else {
+      int flags = fcntl(fd, F_GETFL);
+      flags |= F_ERR;
+      fcntl(fd, F_SETFL, flags);
+   }
 #elif defined(__APPLE__) || defined(__FreeBSD__)
       else stream->_flags |= __SERR;
 #else
