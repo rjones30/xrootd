@@ -308,11 +308,22 @@ size_t XrdPosix_Fread(void *ptr, size_t size, size_t nitems, FILE *stream)
 
 // Get the right return code. Note that we cannot emulate the flags in sunx86
 //
-        if (bytes > 0 && size) rc = bytes/size;
+   if (bytes > 0 && size) rc = bytes/size;
 #ifndef SUNX86
-#if defined(__linux__)
+#if defined(__linux__) && defined (__GLIBC__)
    else if (bytes < 0) stream->_flags |= _IO_ERR_SEEN;
    else                stream->_flags |= _IO_EOF_SEEN;
+#elif defined(__linux__)
+   else if (bytes < 0) {
+      int flags = fcntl(fd, F_GETFL);
+      flags |= _IO_ERR_SEEN;
+      fcntl(fd, F_SETFL, flags);
+   }
+   else {
+      int flags = fcntl(fd, F_GETFL);
+      flags |= _IO_EOF_SEEN;
+      fcntl(fd, F_SETFL, flags);
+   }
 #elif defined(__APPLE__) || defined(__FreeBSD__)
    else if (bytes < 0) stream->_flags |= __SEOF;
    else                stream->_flags |= __SERR;
@@ -912,9 +923,10 @@ int XrdPosix_Statfs(const char *path, struct statfs *buf)
 
 // Return the results of an open of a Unix file
 //
+   void *buf64 = (void*)buf;
    return ((myPath = XrootPath.URL(path, buff, sizeof(buff)))
           ? Xroot.Statfs(myPath, buf) 
-          : Xunix.Statfs64(path, (struct statfs64 *)buf));
+          : Xunix.Statfs64(path, (struct statfs64 *)buf64));
 }
 }
   
