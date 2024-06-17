@@ -42,6 +42,7 @@
 #define __XRD_CL_MONITOR_HH__
 
 #include "XrdCl/XrdClFileSystem.hh"
+#include <sys/time.h>
 
 namespace XrdCl
 {

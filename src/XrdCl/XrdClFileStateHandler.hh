@@ -35,6 +35,7 @@
 #include <set>
 
 #include <sys/uio.h>
+#include <sys/time.h>
 
 namespace XrdCl
 {
