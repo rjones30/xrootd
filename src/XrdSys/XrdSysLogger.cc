@@ -41,7 +41,8 @@
 #include <unistd.h>
 #include <strings.h>
 #include <sys/param.h>
-#include <sys/termios.h>
+//#include <sys/termios.h>
+#include <termios.h>
 #include <sys/uio.h>
 #endif // WIN32
 
