@@ -232,7 +232,7 @@ extern "C"
 #      define SOCKLEN_t socklen_t
 #   endif
 #elif !defined(SOCKLEN_t)
-#   define SOCKLEN_t int
+#   define SOCKLEN_t unsigned int
 #endif
 
 #ifdef _LP64
