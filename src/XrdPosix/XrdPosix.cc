@@ -39,7 +39,13 @@
 #include <sys/uio.h>
 
 #ifdef __MUSL__
-#include <stdio_ext.h>
+#define F_PERM 1
+#define F_NORD 4
+#define F_NOWR 8
+#define F_EOF 16
+#define F_ERR 32
+#define F_SVB 64
+#define F_APP 128
 #endif
 
 #include "XrdSys/XrdSysHeaders.hh"
@@ -314,18 +320,18 @@ size_t XrdPosix_Fread(void *ptr, size_t size, size_t nitems, FILE *stream)
 //
    if (bytes > 0 && size) rc = bytes/size;
 #ifndef SUNX86
-#if defined(__linux__) && defined (__GLIBC__)
+#if defined(__linux__) && defined(__GLIBC__)
    else if (bytes < 0) stream->_flags |= _IO_ERR_SEEN;
    else                stream->_flags |= _IO_EOF_SEEN;
-#elif defined(__linux__)
+#elif defined(__MUSL__)
    else if (bytes < 0) {
       int flags = fcntl(fd, F_GETFL);
-      flags |= _IO_ERR_SEEN;
+      flags |= F_ERR;
       fcntl(fd, F_SETFL, flags);
    }
    else {
       int flags = fcntl(fd, F_GETFL);
-      flags |= _IO_EOF_SEEN;
+      flags |= F_EOF;
       fcntl(fd, F_SETFL, flags);
    }
 #elif defined(__APPLE__) || defined(__FreeBSD__)
@@ -927,11 +933,9 @@ int XrdPosix_Statfs(const char *path, struct statfs *buf)
 
 // Return the results of an open of a Unix file
 //
-   void *buffy = (void*)buf;
-   struct statfs64 *buf64 = (struct statfs64 *)buffy;
    return ((myPath = XrootPath.URL(path, buff, sizeof(buff)))
           ? Xroot.Statfs(myPath, buf) 
-          : Xunix.Statfs64(path, (struct statfs64 *)buf64));
+          : Xunix.Statfs64(path, (struct statfs64 *)buf));
 }
 }
   

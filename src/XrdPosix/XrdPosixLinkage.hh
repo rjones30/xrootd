@@ -52,6 +52,11 @@
 #define UNIX_PFX
 //#endif
 
+#ifdef __MUSL__
+#define statfs64 statfs
+#define statvfs64 statvfs
+#endif
+
 #define Symb_Access UNIX_PFX "access"
 #define Retv_Access int
 #define Args_Access const char *path, int amode
