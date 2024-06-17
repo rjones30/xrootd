@@ -32,6 +32,7 @@
 
 #include <time.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 #include "XrdOuc/XrdOucDLlist.hh"
 #include "XrdSys/XrdSysError.hh"
 #include "XrdSys/XrdSysPthread.hh"

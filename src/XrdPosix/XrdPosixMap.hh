@@ -32,6 +32,7 @@
 /******************************************************************************/
 
 #include <stdint.h>
+#include <sys/types.h>
 
 #include "XrdCl/XrdClFileSystem.hh"
 #include "XrdCl/XrdClXRootDResponses.hh"
