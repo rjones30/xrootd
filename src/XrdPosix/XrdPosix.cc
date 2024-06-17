@@ -38,6 +38,10 @@
 #include <unistd.h>
 #include <sys/uio.h>
 
+#ifdef __MUSL__
+#include <stdio_ext.h>
+#endif
+
 #include "XrdSys/XrdSysHeaders.hh"
 #include "XrdPosix/XrdPosixLinkage.hh"
 #include "XrdPosix/XrdPosixXrootd.hh"
@@ -923,7 +927,8 @@ int XrdPosix_Statfs(const char *path, struct statfs *buf)
 
 // Return the results of an open of a Unix file
 //
-   void *buf64 = (void*)buf;
+   void *buffy = (void*)buf;
+   struct statfs64 *buf64 = (struct statfs64 *)buffy;
    return ((myPath = XrootPath.URL(path, buff, sizeof(buff)))
           ? Xroot.Statfs(myPath, buf) 
           : Xunix.Statfs64(path, (struct statfs64 *)buf64));
