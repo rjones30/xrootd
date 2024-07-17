@@ -113,16 +113,20 @@ const char *XrdSysE2T(int errcode)
 // Our errno registration wasn't sufficient, so check if it's already
 // registered and if not, register it.
 //
-   e2sMutex.Lock();
-   std::string eTxt = e2sMap[errcode];
-   if (!eTxt.size())
-      {snprintf(eBuff, sizeof(eBuff), "unknown error %d", errcode);
-       eTxt = std::string(eBuff);
-       e2sMap[errcode] = eTxt;
-      }
+
+std::cerr << "crazy daisy in XrdSysE2T(" << errcode << ")" << std::endl;
+return "crazy daisy";
+
+//   e2sMutex.Lock();
+//   std::string eTxt = e2sMap[errcode];
+//   if (!eTxt.size())
+//      {snprintf(eBuff, sizeof(eBuff), "unknown error %d", errcode);
+//       eTxt = std::string(eBuff);
+//       e2sMap[errcode] = eTxt;
+//      }
 
 // Return the result
 //
-   e2sMutex.UnLock();
-   return eTxt.c_str();
+//   e2sMutex.UnLock();
+//   return eTxt.c_str();
 }
