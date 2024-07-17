@@ -31,6 +31,7 @@
 #include <cstring>
 #include <map>
 #include <string>
+#include <iostream>
 
 #include "XrdSys/XrdSysPthread.hh"
 
