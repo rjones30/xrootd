@@ -19,6 +19,16 @@ add_library(
   XrdFfs/XrdFfsQueue.cc       XrdFfs/XrdFfsQueue.hh
   XrdFfs/XrdFfsWcache.cc      XrdFfs/XrdFfsWcache.hh )
 
+add_library(
+  XrdFfs_static
+  STATIC
+  XrdFfs/XrdFfsDent.cc        XrdFfs/XrdFfsDent.hh
+  XrdFfs/XrdFfsFsinfo.cc      XrdFfs/XrdFfsFsinfo.hh
+  XrdFfs/XrdFfsMisc.cc        XrdFfs/XrdFfsMisc.hh
+  XrdFfs/XrdFfsPosix.cc       XrdFfs/XrdFfsPosix.hh
+  XrdFfs/XrdFfsQueue.cc       XrdFfs/XrdFfsQueue.hh
+  XrdFfs/XrdFfsWcache.cc      XrdFfs/XrdFfsWcache.hh )
+
 target_link_libraries(
   XrdFfs
   PRIVATE
@@ -55,7 +65,7 @@ endif()
 # Install
 #-------------------------------------------------------------------------------
 install(
-  TARGETS XrdFfs
+  TARGETS XrdFfs XrdFfs_static
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} )
 
 if( BUILD_FUSE )

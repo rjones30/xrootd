@@ -32,6 +32,27 @@ add_library(
   XrdPosix/XrdPosixXrootdPath.cc   XrdPosix/XrdPosixXrootdPath.hh
                                    XrdPosix/XrdPosixOsDep.hh    )
 
+add_library(
+  XrdPosix_static
+  STATIC
+  XrdPosix/XrdPosixAdmin.cc        XrdPosix/XrdPosixAdmin.hh
+  XrdPosix/XrdPosixCache.cc        XrdPosix/XrdPosixCache.hh
+  XrdPosix/XrdPosixCallBack.cc     XrdPosix/XrdPosixCallBack.hh
+  XrdPosix/XrdPosixConfig.cc       XrdPosix/XrdPosixConfig.hh
+  XrdPosix/XrdPosixDir.cc          XrdPosix/XrdPosixDir.hh
+  XrdPosix/XrdPosixExtra.cc        XrdPosix/XrdPosixExtra.hh
+  XrdPosix/XrdPosixFile.cc         XrdPosix/XrdPosixFile.hh
+  XrdPosix/XrdPosixFileRH.cc       XrdPosix/XrdPosixFileRH.hh
+  XrdPosix/XrdPosixMap.cc          XrdPosix/XrdPosixMap.hh
+  XrdPosix/XrdPosixObject.cc       XrdPosix/XrdPosixObject.hh
+                                   XrdPosix/XrdPosixObjGuard.hh
+  XrdPosix/XrdPosixPrepIO.cc       XrdPosix/XrdPosixPrepIO.hh
+                                   XrdPosix/XrdPosixStats.hh
+                                   XrdPosix/XrdPosixTrace.hh
+  XrdPosix/XrdPosixXrootd.cc       XrdPosix/XrdPosixXrootd.hh
+  XrdPosix/XrdPosixXrootdPath.cc   XrdPosix/XrdPosixXrootdPath.hh
+                                   XrdPosix/XrdPosixOsDep.hh    )
+
 target_link_libraries(
   XrdPosix
   PRIVATE
@@ -80,5 +101,5 @@ target_compile_options(XrdPosixPreload PRIVATE -fno-lto)
 # Install
 #-------------------------------------------------------------------------------
 install(
-  TARGETS XrdPosix XrdPosixPreload
+  TARGETS XrdPosix XrdPosix_static XrdPosixPreload
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} )

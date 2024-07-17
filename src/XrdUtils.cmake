@@ -290,6 +290,22 @@ add_library(
   ${XrdSecSources}
 )
 
+add_library(
+  XrdUtils_static
+  STATIC
+  ${XProtocolSources}
+  ${XrdSysSources}
+  ${XrdTlsSources}
+  ${XrdCryptoSources}
+  ${XrdOucSources}
+  ${XrdNetSources}
+  ${XrdSutSources}
+  ${XrdSources}
+  ${XrdCksSources}
+  ${XrdRmcSources}
+  ${XrdSecSources}
+)
+
 target_link_libraries(
   XrdUtils
   PRIVATE
@@ -318,5 +334,5 @@ set_target_properties(
 # Install
 #-------------------------------------------------------------------------------
 install(
-  TARGETS XrdUtils
+  TARGETS XrdUtils XrdUtils_static
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} )
