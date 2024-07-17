@@ -305,6 +305,10 @@ add_library(
   ${XrdSecSources}
 )
 
+if (NOT "${OPENSSL_INCLUDE_DIR}" STREQUAL "")
+    target_include_directories(XrdUtils_static PRIVATE ${OPENSSL_INCLUDE_DIR))
+endif()
+
 target_link_libraries(
   XrdUtils
   PRIVATE
