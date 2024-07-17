@@ -36,6 +36,11 @@ add_library(
   SHARED
   ${XrdCryptoSources} )
 
+add_library(
+  XrdCrypto_static
+  STATIC
+  ${XrdCryptoSources} )
+
 target_link_libraries(
   XrdCrypto
   PRIVATE
@@ -59,6 +64,11 @@ set( XrdCryptoLiteSources
 add_library(
   XrdCryptoLite
   SHARED
+  ${XrdCryptoLiteSources} )
+
+add_library(
+  XrdCryptoLite_static
+  STATIC
   ${XrdCryptoLiteSources} )
 
 target_link_libraries(
@@ -106,7 +116,7 @@ target_link_libraries(
 # Install
 #-------------------------------------------------------------------------------
 install(
-  TARGETS XrdCrypto XrdCryptoLite
+  TARGETS XrdCrypto XrdCrypto_static XrdCryptoLite XrdCryptoLite_static
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} )
 
 install(

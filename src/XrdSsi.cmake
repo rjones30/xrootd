@@ -47,6 +47,36 @@ XrdSsi/XrdSsiTaskReal.cc               XrdSsi/XrdSsiTaskReal.hh
                                        XrdSsi/XrdSsiTrace.hh
 XrdSsi/XrdSsiUtils.cc                  XrdSsi/XrdSsiUtils.hh)
 
+add_library(
+  XrdSsiLib_static
+  STATIC
+XrdSsi/XrdSsiAlert.cc                  XrdSsi/XrdSsiAlert.hh
+XrdSsi/XrdSsiAtomics.cc                XrdSsi/XrdSsiAtomics.hh
+                                       XrdSsi/XrdSsiBVec.hh
+XrdSsi/XrdSsiClient.cc
+                                       XrdSsi/XrdSsiCluster.hh
+XrdSsi/XrdSsiCms.cc                    XrdSsi/XrdSsiCms.hh
+XrdSsi/XrdSsiErrInfo.cc                XrdSsi/XrdSsiErrInfo.hh
+XrdSsi/XrdSsiEvent.cc                  XrdSsi/XrdSsiEvent.hh
+XrdSsi/XrdSsiFileResource.cc           XrdSsi/XrdSsiFileResource.hh
+XrdSsi/XrdSsiLogger.cc                 XrdSsi/XrdSsiLogger.hh
+                                       XrdSsi/XrdSsiProvider.hh
+                                       XrdSsi/XrdSsiRRAgent.hh
+                                       XrdSsi/XrdSsiRRInfo.hh
+                                       XrdSsi/XrdSsiRRTable.hh
+XrdSsi/XrdSsiRequest.cc                XrdSsi/XrdSsiRequest.hh
+XrdSsi/XrdSsiResponder.cc              XrdSsi/XrdSsiResponder.hh
+                                       XrdSsi/XrdSsiResource.hh
+XrdSsi/XrdSsiScale.cc                  XrdSsi/XrdSsiScale.hh
+XrdSsi/XrdSsiServReal.cc               XrdSsi/XrdSsiServReal.hh
+XrdSsi/XrdSsiService.cc                XrdSsi/XrdSsiService.hh
+XrdSsi/XrdSsiSessReal.cc               XrdSsi/XrdSsiSessReal.hh
+XrdSsi/XrdSsiStats.cc                  XrdSsi/XrdSsiStats.hh
+                                       XrdSsi/XrdSsiStream.hh
+XrdSsi/XrdSsiTaskReal.cc               XrdSsi/XrdSsiTaskReal.hh
+                                       XrdSsi/XrdSsiTrace.hh
+XrdSsi/XrdSsiUtils.cc                  XrdSsi/XrdSsiUtils.hh)
+
 target_link_libraries(
   XrdSsiLib
   PRIVATE
@@ -66,6 +96,13 @@ set_target_properties(
 add_library(
   XrdSsiShMap
   SHARED
+XrdSsi/XrdSsiShMam.cc                  XrdSsi/XrdSsiShMam.hh
+XrdSsi/XrdSsiShMap.icc                 XrdSsi/XrdSsiShMap.hh
+XrdSsi/XrdSsiShMat.cc                  XrdSsi/XrdSsiShMat.hh)
+
+add_library(
+  XrdSsiShMap_static
+  STATIC
 XrdSsi/XrdSsiShMam.cc                  XrdSsi/XrdSsiShMam.hh
 XrdSsi/XrdSsiShMap.icc                 XrdSsi/XrdSsiShMap.hh
 XrdSsi/XrdSsiShMat.cc                  XrdSsi/XrdSsiShMat.hh)
@@ -125,5 +162,5 @@ target_link_libraries(
 # Install
 #-------------------------------------------------------------------------------
 install(
-  TARGETS XrdSsiLib XrdSsiShMap ${LIB_XRD_SSI} ${LIB_XRD_SSILOG}
+  TARGETS XrdSsiLib XrdSsiLib_static XrdSsiShMap XrdSsiShMap_static ${LIB_XRD_SSI} ${LIB_XRD_SSILOG}
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} )

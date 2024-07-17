@@ -160,6 +160,13 @@ add_library(
   XrdApps/XrdCpFile.cc            XrdApps/XrdCpFile.hh
   XrdApps/XrdMpxXml.cc            XrdApps/XrdMpxXml.hh )
 
+add_library(
+  XrdAppUtils_static
+  STATIC
+  XrdApps/XrdCpConfig.cc          XrdApps/XrdCpConfig.hh
+  XrdApps/XrdCpFile.cc            XrdApps/XrdCpFile.hh
+  XrdApps/XrdMpxXml.cc            XrdApps/XrdMpxXml.hh )
+
 target_link_libraries(
   XrdAppUtils
   PRIVATE
@@ -206,7 +213,7 @@ target_link_libraries(
 # Install
 #-------------------------------------------------------------------------------
 install(
-  TARGETS XrdAppUtils ${LIB_XRDCL_PROXY_PLUGIN} ${LIB_XRDCL_RECORDER_PLUGIN}
+  TARGETS XrdAppUtils XrdAppUtils_static ${LIB_XRDCL_PROXY_PLUGIN} ${LIB_XRDCL_RECORDER_PLUGIN}
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} )
 
