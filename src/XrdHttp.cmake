@@ -41,6 +41,10 @@ if( BUILD_HTTP )
     STATIC
     ${XrdHttpSources} )
 
+  if (NOT "${OPENSSL_INCLUDE_DIR}" STREQUAL "")
+      target_include_directories(${LIB_XRD_HTTP_UTILS}_static PRIVATE ${OPENSSL_INCLUDE_DIR})
+  endif()
+
   add_library(
     ${MOD_XRD_HTTP}
     MODULE

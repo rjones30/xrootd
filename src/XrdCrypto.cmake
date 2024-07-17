@@ -41,6 +41,10 @@ add_library(
   STATIC
   ${XrdCryptoSources} )
 
+if (NOT "${OPENSSL_INCLUDE_DIR}" STREQUAL "")
+    target_include_directories(XrdCrypto_static PRIVATE ${OPENSSL_INCLUDE_DIR})
+endif()
+
 target_link_libraries(
   XrdCrypto
   PRIVATE
@@ -70,6 +74,10 @@ add_library(
   XrdCryptoLite_static
   STATIC
   ${XrdCryptoLiteSources} )
+
+if (NOT "${OPENSSL_INCLUDE_DIR}" STREQUAL "")
+    target_include_directories(XrdCryptoLite_static PRIVATE ${OPENSSL_INCLUDE_DIR})
+endif()
 
 target_link_libraries(
   XrdCryptoLite
