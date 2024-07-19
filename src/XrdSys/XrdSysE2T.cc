@@ -43,6 +43,7 @@
 
 namespace
 {
+static int                 init_called = 0;
 static const int           errSlots = 144;
 XrdSysMutex                e2sMutex;
 std::map<int, std::string> e2sMap;
@@ -84,6 +85,8 @@ int initErrTable()
            }
        }
 
+   init_called = 1;
+
 // Return the highest valid one
 //
    Errno2String[0] = "no error";
@@ -101,6 +104,11 @@ const char *XrdSysE2T(int errcode)
 {
    char eBuff[80];
 
+   if (!init_called) {
+      snprintf(eBuff, sizeof(eBuff), "unknown error %d", errcode);
+      return eBuff;
+   }
+
 // Check if we can return this immediately
 //
    if (errcode == 0) return Errno2String[0];
@@ -113,21 +121,17 @@ const char *XrdSysE2T(int errcode)
 
 // Our errno registration wasn't sufficient, so check if it's already
 // registered and if not, register it.
-//
 
-std::cerr << "crazy daisy in XrdSysE2T(" << errcode << ")" << std::endl;
-return "crazy daisy";
-
-//   e2sMutex.Lock();
-//   std::string eTxt = e2sMap[errcode];
-//   if (!eTxt.size())
-//      {snprintf(eBuff, sizeof(eBuff), "unknown error %d", errcode);
-//       eTxt = std::string(eBuff);
-//       e2sMap[errcode] = eTxt;
-//      }
+   e2sMutex.Lock();
+   std::string eTxt = e2sMap[errcode];
+   if (!eTxt.size())
+      {snprintf(eBuff, sizeof(eBuff), "unknown error %d", errcode);
+       eTxt = std::string(eBuff);
+       e2sMap[errcode] = eTxt;
+      }
 
 // Return the result
-//
-//   e2sMutex.UnLock();
-//   return eTxt.c_str();
+
+   e2sMutex.UnLock();
+   return eTxt.c_str();
 }
