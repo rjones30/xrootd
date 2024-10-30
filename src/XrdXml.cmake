@@ -42,6 +42,15 @@ add_library(
   XrdXml/XrdXmlReader.cc           XrdXml/XrdXmlReader.hh
   ${XRDXML2_READER_FILES} )
 
+add_library(
+  XrdXml_static
+  STATIC
+  ${TINYXML_FILES}
+  XrdXml/XrdXmlMetaLink.cc         XrdXml/XrdXmlMetaLink.hh
+  XrdXml/XrdXmlRdrTiny.cc          XrdXml/XrdXmlRdrTiny.hh
+  XrdXml/XrdXmlReader.cc           XrdXml/XrdXmlReader.hh
+  ${XRDXML2_READER_FILES} )
+
 target_link_libraries(
   XrdXml
   PRIVATE
@@ -58,17 +67,20 @@ set_target_properties(
 
 if ( TINYXML_FOUND )
    target_include_directories( XrdXml PRIVATE ${TINYXML_INCLUDE_DIR} )
+   target_include_directories( XrdXml_static PRIVATE ${TINYXML_INCLUDE_DIR} )
 else()
    target_include_directories( XrdXml PRIVATE XrdXml/tinyxml )
+   target_include_directories( XrdXml_static PRIVATE XrdXml/tinyxml )
 endif()
 
 if ( LIBXML2_FOUND )
    target_include_directories( XrdXml PRIVATE ${LIBXML2_INCLUDE_DIR} )
+   target_include_directories( XrdXml_static PRIVATE ${LIBXML2_INCLUDE_DIR} )
 endif()
 
 #-------------------------------------------------------------------------------
 # Install
 #-------------------------------------------------------------------------------
 install(
-  TARGETS XrdXml
+  TARGETS XrdXml XrdXml_static
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} )

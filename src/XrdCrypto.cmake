@@ -36,6 +36,15 @@ add_library(
   SHARED
   ${XrdCryptoSources} )
 
+add_library(
+  XrdCrypto_static
+  STATIC
+  ${XrdCryptoSources} )
+
+if (NOT "${OPENSSL_INCLUDE_DIR}" STREQUAL "")
+    target_include_directories(XrdCrypto_static PRIVATE ${OPENSSL_INCLUDE_DIR})
+endif()
+
 target_link_libraries(
   XrdCrypto
   PRIVATE
@@ -60,6 +69,15 @@ add_library(
   XrdCryptoLite
   SHARED
   ${XrdCryptoLiteSources} )
+
+add_library(
+  XrdCryptoLite_static
+  STATIC
+  ${XrdCryptoLiteSources} )
+
+if (NOT "${OPENSSL_INCLUDE_DIR}" STREQUAL "")
+    target_include_directories(XrdCryptoLite_static PRIVATE ${OPENSSL_INCLUDE_DIR})
+endif()
 
 target_link_libraries(
   XrdCryptoLite
@@ -106,7 +124,7 @@ target_link_libraries(
 # Install
 #-------------------------------------------------------------------------------
 install(
-  TARGETS XrdCrypto XrdCryptoLite
+  TARGETS XrdCrypto XrdCrypto_static XrdCryptoLite XrdCryptoLite_static
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} )
 
 install(
